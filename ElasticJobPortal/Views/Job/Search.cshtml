@@ -1,0 +1,30 @@
+﻿@model List<ElasticJobPortal.Models.Job>
+
+@{
+    ViewData["Title"] = "Job Search";
+}
+
+<h2>Search for Jobs</h2>
+
+<form method="get" asp-action="Search" asp-controller="Job">
+    <input type="text" name="keyword" placeholder="e.g. developer, sql, power bi" class="form-control" />
+    <button type="submit" class="btn btn-primary mt-2">Search</button>
+</form>
+
+@if (Model != null && Model.Any())
+{
+    <h4>Found @Model.Count results:</h4>
+    <ul class="list-group mt-3">
+        @foreach (var job in Model)
+        {
+            <li class="list-group-item">
+                <strong>@job.Title</strong> at <em>@job.Company</em><br />
+                <small>@job.Description</small>
+            </li>
+        }
+    </ul>
+}
+else if (Model != null)
+{
+    <p>No results found.</p>
+}
