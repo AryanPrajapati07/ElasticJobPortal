@@ -1,6 +1,7 @@
+using ElasticJobPortal.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ElasticJobPortal.Services;
+using Nest;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,14 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddSingleton<ElasticClient>(provider =>
+{
+    var settings = new ConnectionSettings(new Uri("http://localhost:9200"))
+                   .DefaultIndex("jobs");
+
+    return new ElasticClient(settings);
+});
 
 var app = builder.Build();
 
