@@ -102,6 +102,8 @@ namespace ElasticJobPortal.Controllers
             return Json(stats);
         }
 
+      
+
 
 
     }

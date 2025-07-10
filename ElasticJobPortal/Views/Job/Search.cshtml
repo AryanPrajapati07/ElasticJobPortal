@@ -122,7 +122,7 @@
     <div class="search-section">
         <h2>Search for Jobs</h2>
         <form method="get" asp-action="Search" asp-controller="Job">
-            <input type="text" id="keyword" name="keyword" placeholder="e.g. developer, sql, power bi" class="form-control" autocomplete="on" />
+            <input type="text" id="keyword" name="keyword" placeholder="e.g. developer, sql, power bi" class="form-control" autocomplete="off" />
             <button type="submit" class="btn btn-primary mt-2">Search</button>
         </form>
     </div>
@@ -136,6 +136,7 @@
             <div class="job-item">
                 <div class="job-title">@job.Title</div>
                 <div class="company">@job.Company</div>
+                <div class="description">@job.JobType</div>
                 <div class="description">@job.Description</div>
             </div>
         }
