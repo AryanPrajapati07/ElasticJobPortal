@@ -26,21 +26,42 @@ namespace ElasticJobPortal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(string email,string password, string role)
+        [HttpPost]
+        public async Task<IActionResult> Register(string email, string password, string role)
         {
-            var user = new ApplicationUser { UserName = email, Email = email };
+            var user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email
+            };
+
             var result = await _userManager.CreateAsync(user, password);
 
             if (result.Succeeded)
             {
+                // 👇 Assign role based on dropdown selection
+                if (!await _roleManager.RoleExistsAsync(role))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(role));
+                }
+
                 await _userManager.AddToRoleAsync(user, role);
+
+                // Optional: sign in the user after registration
                 await _signInManager.SignInAsync(user, isPersistent: false);
+
                 return RedirectToAction("Index", "Home");
             }
 
-            return View();
+            // Add error handling
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
 
+            return View();
         }
+
 
         [HttpGet]
         public IActionResult Login()

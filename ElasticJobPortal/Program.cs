@@ -22,7 +22,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddDefaultTokenProviders()
 .AddDefaultUI(); // Only needed if you're using scaffolded Identity UI
 
-// ✅ ElasticSearch
+// ElasticSearch
 builder.Services.AddSingleton<ElasticClient>(provider =>
 {
     var settings = new ConnectionSettings(new Uri("http://localhost:9200"))

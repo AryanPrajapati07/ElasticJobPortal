@@ -1,0 +1,44 @@
+﻿@model ElasticJobPortal.Models.Job
+
+<form asp-action="Create" asp-controller="Job" method="post">
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        <label asp-for="Title"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Company"></label>
+        <input asp-for="Company" class="form-control" />
+        <span asp-validation-for="Company" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="JobType"></label>
+        <select asp-for="JobType" class="form-control">
+            <option value="">-- Select --</option>
+            <option>Full-time</option>
+            <option>Part-time</option>
+            <option>Internship</option>
+        </select>
+        <span asp-validation-for="JobType" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Skills (comma-separated)</label>
+        <input asp-for="SkillsCsv" class="form-control" placeholder="e.g. C#, ASP.NET, SQL" />
+        <span asp-validation-for="SkillsCsv" class="text-danger"></span>
+
+    </div>
+
+    <button class="btn btn-primary">Post Job</button>
+</form>

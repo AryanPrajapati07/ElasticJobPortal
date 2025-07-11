@@ -138,6 +138,13 @@
                 <div class="company">@job.Company</div>
                 <div class="description">@job.JobType</div>
                 <div class="description">@job.Description</div>
+
+                @if (User.IsInRole("JobSeeker"))
+                {
+                    <a asp-action="Apply" asp-route-jobId="@job.Id" class="btn btn-success btn-sm mt-2">Apply</a>
+                }
+
+
             </div>
         }
     }

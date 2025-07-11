@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -27,6 +28,26 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+
+                        @inject SignInManager<ApplicationUser> SignInManager
+                        @inject UserManager<ApplicationUser> UserManager
+
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            var user = await UserManager.GetUserAsync(User);
+                            var roles = await UserManager.GetRolesAsync(user);
+
+                            if (roles.Contains("Admin"))
+                            {
+                                <li><a asp-controller="Job" asp-action="Create">Post Job</a></li>
+                            }
+                            else if (roles.Contains("JobSeeker"))
+                            {
+                                <li><a asp-action="MyApplications" asp-controller="Job">My Applications</a></li>
+                            }
+                        }
+
+
                     </ul>
                     <ul class="navbar-nav">
                         @if (User.Identity.IsAuthenticated)
@@ -80,3 +101,8 @@
 
 </body>
 </html>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

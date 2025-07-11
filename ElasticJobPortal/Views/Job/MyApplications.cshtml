@@ -1,0 +1,13 @@
+﻿@model List<JobApplication>
+
+<h2>My Applications</h2>
+<table class="table">
+    <tr><th>Job ID</th><th>Date</th></tr>
+    @foreach (var app in Model)
+    {
+        <tr>
+            <td>@app.JobId</td>
+            <td>@app.AppliedOn.ToShortDateString()</td>
+        </tr>
+    }
+</table>

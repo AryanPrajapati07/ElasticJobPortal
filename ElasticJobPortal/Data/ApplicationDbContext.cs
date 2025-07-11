@@ -12,10 +12,8 @@ namespace ElasticJobPortal.Services
         }
 
         public DbSet<Job> Jobs { get; set; }
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Job>().Ignore(j => j.TitleSuggest);
-        }
+        public DbSet<JobApplication> JobApplications { get; set; }
+
+        
     }
 }
