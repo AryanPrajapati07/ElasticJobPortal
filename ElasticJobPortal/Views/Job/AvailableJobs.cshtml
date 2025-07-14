@@ -1,0 +1,47 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model List<ElasticJobPortal.Models.Job>
+@{
+    foreach (var claim in User.Claims)
+    {
+        Console.WriteLine($"CLAIM: {claim.Type} = {claim.Value}");
+    }
+    ViewData["Title"] = "Available Jobs";
+}
+@if (User.IsInRole("JobSeeker"))
+{
+    <div class="alert alert-success">✅ You are in JobSeeker role</div>
+}
+else
+{
+    <div class="alert alert-danger">❌ NOT in JobSeeker role</div>
+}
+
+
+
+
+<h2 class="mb-4">Available Jobs</h2>
+
+<div class="row">
+    @foreach (var job in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">@job.Title</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">@job.Company</h6>
+                    <p class="card-text">
+                        <strong>@job.Description</strong><br />
+
+                        <strong>Job Type:</strong> @job.JobType <br />
+                        <strong>Skills:</strong> @job.SkillsCsv <br />
+                    </p>
+                    <form method="post" asp-action="Apply" asp-controller="Job">
+                        <input type="hidden" name="jobId" value="@job.Id" />
+                        <button type="submit" class="btn btn-sm btn-primary">Apply Now</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    }
+</div>

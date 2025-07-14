@@ -1,4 +1,4 @@
-﻿using Nest;
+﻿
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -20,8 +20,7 @@ namespace ElasticJobPortal.Models
         [Required(ErrorMessage = "JobType is required")]
         public string JobType { get; set; }
 
-        [NotMapped]
-        public CompletionField TitleSuggest { get; set; }
+      
 
         // Save to DB as CSV string
         public string SkillsCsv { get; set; }

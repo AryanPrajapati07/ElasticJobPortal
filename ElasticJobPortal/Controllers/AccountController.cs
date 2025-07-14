@@ -87,5 +87,8 @@ namespace ElasticJobPortal.Controllers
             return RedirectToAction("Login");
         }
 
+        
+
+
     }
 }
