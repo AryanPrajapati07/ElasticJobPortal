@@ -1,0 +1,68 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+    var statusData = ViewBag.StatusBreakdown as List<dynamic> ?? new List<dynamic>();
+}
+
+<h2>Admin Dashboard</h2>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card bg-light p-3 shadow-sm">
+            <h4>Total Jobs</h4>
+            <h2>@ViewBag.TotalJobs</h2>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-light p-3 shadow-sm">
+            <h4>Total Applications</h4>
+            <h2>@ViewBag.TotalApplications</h2>
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 shadow-sm">
+    <h4>Application Status Chart</h4>
+    <canvas id="statusChart" height="100"></canvas>
+</div>
+
+@if (statusData.Any())
+{
+    <div class="card p-4 shadow-sm">
+        <h4>Application Status Chart</h4>
+        <canvas id="statusChart" height="100"></canvas>
+    </div>
+
+    @section Scripts {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(statusData.Select(s => s.Status))),
+                    datasets: [{
+                        label: 'Applications',
+                        data: @Html.Raw(Json.Serialize(statusData.Select(s => s.Count))),
+                        backgroundColor: ['#007bff', '#ffc107', '#28a745', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+    }
+}
+else
+{
+    <p>No application data to show in chart.</p>
+}
+
