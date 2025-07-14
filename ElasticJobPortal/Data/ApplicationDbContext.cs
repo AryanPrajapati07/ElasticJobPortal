@@ -14,6 +14,7 @@ namespace ElasticJobPortal.Services
         public DbSet<Job> Jobs { get; set; }
         public DbSet<JobApplication> JobApplications { get; set; }
 
-        
+
+
     }
 }

@@ -1,44 +1,205 @@
 ﻿@model ElasticJobPortal.Models.Job
 
-<form asp-action="Create" asp-controller="Job" method="post">
-    @Html.AntiForgeryToken()
-    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-briefcase me-2"></i>
+                        Post a New Job
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" asp-controller="Job" method="post" novalidate>
+                        @Html.AntiForgeryToken()
 
-    <div class="form-group">
-        <label asp-for="Title"></label>
-        <input asp-for="Title" class="form-control" />
-        <span asp-validation-for="Title" class="text-danger"></span>
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div class="alert alert-danger" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Please correct the errors below and try again.
+                            </div>
+                        }
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Title" class="form-label fw-bold">
+                                        Job Title <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="Title"
+                                           class="form-control"
+                                           placeholder="e.g. Senior Software Developer"
+                                           required />
+                                    <span asp-validation-for="Title" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Company" class="form-label fw-bold">
+                                        Company Name <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="Company"
+                                           class="form-control"
+                                           placeholder="e.g. Tech Solutions Inc."
+                                           required />
+                                    <span asp-validation-for="Company" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Description" class="form-label fw-bold">
+                                Job Description <span class="text-danger">*</span>
+                            </label>
+                            <textarea asp-for="Description"
+                                      class="form-control"
+                                      rows="6"
+                                      placeholder="Describe the job responsibilities, requirements, and benefits..."
+                                      required></textarea>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Provide a detailed description to attract the right candidates
+                            </div>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="JobType" class="form-label fw-bold">
+                                        Job Type <span class="text-danger">*</span>
+                                    </label>
+                                    <select asp-for="JobType" class="form-select" required>
+                                        <option value="">-- Select Job Type --</option>
+                                        <option value="Full-time">Full-time</option>
+                                        <option value="Part-time">Part-time</option>
+                                        <option value="Contract">Contract</option>
+                                        <option value="Internship">Internship</option>
+                                        <option value="Remote">Remote</option>
+                                        <option value="Hybrid">Hybrid</option>
+                                    </select>
+                                    <span asp-validation-for="JobType" class="text-danger small"></span>
+                                </div>
+                            </div>
+                           
+                        </div>
+
+                       
+
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold">
+                                Required Skills <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="SkillsCsv"
+                                   class="form-control"
+                                   placeholder="e.g. C#, ASP.NET Core, SQL Server, JavaScript"
+                                   required />
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Separate skills with commas. This helps candidates find relevant positions.
+                            </div>
+                            <span asp-validation-for="SkillsCsv" class="text-danger small"></span>
+                        </div>
+
+                       
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted small">
+                                <i class="fas fa-shield-alt me-1"></i>
+                                Fields marked with <span class="text-danger">*</span> are required
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-outline-secondary me-2" onclick="window.history.back()">
+                                    <i class="fas fa-times me-1"></i>
+                                    Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus me-1"></i>
+                                    Post Job
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <div class="form-group">
-        <label asp-for="Company"></label>
-        <input asp-for="Company" class="form-control" />
-        <span asp-validation-for="Company" class="text-danger"></span>
-    </div>
+<style>
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
 
-    <div class="form-group">
-        <label asp-for="Description"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
 
-    <div class="form-group">
-        <label asp-for="JobType"></label>
-        <select asp-for="JobType" class="form-control">
-            <option value="">-- Select --</option>
-            <option>Full-time</option>
-            <option>Part-time</option>
-            <option>Internship</option>
-        </select>
-        <span asp-validation-for="JobType" class="text-danger"></span>
-    </div>
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
 
-    <div class="form-group">
-        <label>Skills (comma-separated)</label>
-        <input asp-for="SkillsCsv" class="form-control" placeholder="e.g. C#, ASP.NET, SQL" />
-        <span asp-validation-for="SkillsCsv" class="text-danger"></span>
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
 
-    </div>
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
 
-    <button class="btn btn-primary">Post Job</button>
-</form>
+    .form-label {
+        color: #495057;
+    }
+
+    .text-danger {
+        font-size: 0.875rem;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #ced4da;
+    }
+
+    .alert {
+        border: none;
+        border-radius: 8px;
+    }
+
+    .form-text {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+</style>
+
+<script>
+    // Client-side validation enhancement
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const submitBtn = form.querySelector('button[type="submit"]');
+
+        // Add loading state to submit button
+        form.addEventListener('submit', function() {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Posting...';
+            submitBtn.disabled = true;
+        });
+
+        
+        // Skills input enhancement
+        const skillsInput = document.querySelector('input[name="SkillsCsv"]');
+        if (skillsInput) {
+            skillsInput.addEventListener('blur', function() {
+                // Clean up skills format
+                const skills = this.value.split(',').map(skill => skill.trim()).filter(skill => skill);
+                this.value = skills.join(', ');
+            });
+        }
+    });
+</script>

@@ -55,6 +55,31 @@ namespace ElasticJobPortal.Controllers
             return RedirectToAction("List");
         }
 
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AllApplications()
+        {
+            var applications = await _context.JobApplications
+                .Include(a => a.Job)
+                .Include(a => a.User)
+                .ToListAsync();
+
+            return View(applications);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateStatus(int applicationId, string status)
+        {
+            var application = await _context.JobApplications.FindAsync(applicationId);
+            if (application == null) return NotFound();
+
+            application.Status = status;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("AllApplications");
+        }
+
+
+
 
         public IActionResult List()
         {
@@ -65,12 +90,52 @@ namespace ElasticJobPortal.Controllers
 
         [HttpPost]
         [Authorize(Roles = "JobSeeker")]
-        public IActionResult Apply(int jobId)
+        public async Task<IActionResult> Apply(int jobId, IFormFile resumeFile)
         {
-            // Placeholder - You can store applications later
-            TempData["SuccessMessage"] = "Application submitted successfully.";
+            var userId = _usermanager.GetUserId(User);
+
+            var alreadyApplied = await _context.JobApplications
+                .AnyAsync(a => a.JobId == jobId && a.UserId == userId);
+
+            if (alreadyApplied)
+            {
+                TempData["ErrorMessage"] = "You already applied for this job.";
+                return RedirectToAction("AvailableJobs");
+            }
+
+            // ✅ Save resume to wwwroot/resumes
+            string resumePath = null;
+            if (resumeFile != null && resumeFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/resumes");
+                Directory.CreateDirectory(uploadsFolder); // Ensure folder exists
+                var uniqueFileName = $"{Guid.NewGuid()}_{resumeFile.FileName}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await resumeFile.CopyToAsync(fileStream);
+                }
+
+                resumePath = $"/resumes/{uniqueFileName}";
+            }
+
+            var application = new JobApplication
+            {
+                JobId = jobId,
+                UserId = userId,
+                AppliedOn = DateTime.Now,
+                ResumePath = resumePath
+            };
+
+            _context.JobApplications.Add(application);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Applied successfully!";
             return RedirectToAction("AvailableJobs");
         }
+
+
 
 
         [Authorize(Roles = "JobSeeker")]
@@ -78,8 +143,10 @@ namespace ElasticJobPortal.Controllers
         {
             var userId = _usermanager.GetUserId(User);
             var applications = await _context.JobApplications
-                .Where(ja => ja.UserId == userId)
+                .Include(j => j.Job)
+                .Where(j => j.UserId == userId)
                 .ToListAsync();
+
             return View(applications);
         }
 
@@ -101,11 +168,21 @@ namespace ElasticJobPortal.Controllers
         }
 
         [Authorize(Roles = "JobSeeker")]
-        public IActionResult AvailableJobs()
+        public async Task<IActionResult> AvailableJobs()
         {
-            var jobs = _context.Jobs.ToList();
+            var jobs = await _context.Jobs.ToListAsync();
+            var userId = _usermanager.GetUserId(User);
+
+            var appliedJobIds = await _context.JobApplications
+                .Where(a => a.UserId == userId)
+                .Select(a => a.JobId)
+                .ToListAsync();
+
+            ViewBag.AppliedJobs = appliedJobIds;
+
             return View(jobs);
         }
+
 
 
 

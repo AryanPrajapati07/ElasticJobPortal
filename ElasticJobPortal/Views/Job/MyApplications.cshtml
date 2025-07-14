@@ -1,13 +1,151 @@
-﻿@model List<JobApplication>
+﻿@model List<ElasticJobPortal.Models.JobApplication>
+@{
+    ViewData["Title"] = "My Applications";
+}
 
-<h2>My Applications</h2>
-<table class="table">
-    <tr><th>Job ID</th><th>Date</th></tr>
-    @foreach (var app in Model)
-    {
-        <tr>
-            <td>@app.JobId</td>
-            <td>@app.AppliedOn.ToShortDateString()</td>
-        </tr>
+<!-- Include Bootstrap 5 CSS and Font Awesome for icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-</table>
+
+    .table-container {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin: 20px auto;
+        max-width: 1500px;
+    }
+
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+
+        .table th, .table td {
+            vertical-align: middle;
+            padding: 12px;
+        }
+
+        .table th {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+            .table th:hover {
+                background-color: #0056b3;
+            }
+
+        .table tr {
+            transition: background-color 0.2s;
+        }
+
+            .table tr:hover {
+                background-color: #f1f3f5;
+            }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 12px;
+        color: white;
+        font-size: 0.9em;
+        display: inline-block;
+        text-transform: capitalize;
+    }
+
+    .status-pending {
+        background-color: #ffc107;
+    }
+
+    .status-accepted {
+        background-color: #28a745;
+    }
+
+    .status-rejected {
+        background-color: #dc3545;
+    }
+
+    /* Responsive adjustments */
+    (max-width: 768px) {
+        .table-container
+
+    {
+        padding: 10px;
+        margin: 10px;
+    }
+
+    .table th, .table td {
+        font-size: 0.85em;
+        padding: 8px;
+    }
+
+    }
+</style>
+
+<div class="container table-container">
+    <h2 class="mb-4 text-center">My Job Applications</h2>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th scope="col" onclick="sortTable(0)">Job Title <i class="fas fa-sort"></i></th>
+                <th scope="col" onclick="sortTable(1)">Company <i class="fas fa-sort"></i></th>
+                <th scope="col" onclick="sortTable(2)">Applied On <i class="fas fa-sort"></i></th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var app in Model)
+            {
+                <tr>
+                    <td>@app.Job?.Title</td>
+                    <td>@app.Job?.Company</td>
+                    <td>@app.AppliedOn.ToString("dd MMM yyyy")</td>
+                    <td>
+                        <span class="status-badge status-@app.Status.ToLower()">@app.Status</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Include Bootstrap JS for responsiveness -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Table sorting function
+    function sortTable(columnIndex) {
+        const table = document.querySelector("table");
+        const tbody = table.querySelector("tbody");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const isAscending = table.dataset.sortOrder !== "asc";
+        table.dataset.sortOrder = isAscending ? "asc" : "desc";
+
+        rows.sort((a, b) => {
+            let aText = a.cells[columnIndex].textContent.trim();
+            let bText = b.cells[columnIndex].textContent.trim();
+
+            // Special handling for date column (index 2)
+            if (columnIndex === 2) {
+                aText = new Date(aText).getTime();
+                bText = new Date(bText).getTime();
+                return isAscending ? aText - bText : bText - aText;
+            }
+
+            return isAscending
+                ? aText.localeCompare(bText, undefined, { numeric: true })
+                : bText.localeCompare(aText, undefined, { numeric: true });
+        });
+
+        tbody.innerHTML = "";
+        rows.forEach(row => tbody.appendChild(row));
+    }
+</script>

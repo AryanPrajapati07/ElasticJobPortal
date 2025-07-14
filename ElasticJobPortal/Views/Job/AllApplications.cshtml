@@ -1,0 +1,215 @@
+﻿@model List<ElasticJobPortal.Models.JobApplication>
+@{
+    ViewData["Title"] = "All Applications";
+}
+
+<!-- Include Bootstrap 5 CSS and Font Awesome for icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+
+<style>
+    body {
+        background-color: #f4f7fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .table-container {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin: 20px auto;
+        max-width: 1500px;
+    }
+
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+
+        .table th, .table td {
+            vertical-align: middle;
+            padding: 12px;
+        }
+
+        .table th {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+            .table th:hover {
+                background-color: #0056b3;
+            }
+
+        .table tr {
+            transition: background-color 0.2s;
+        }
+
+            .table tr:hover {
+                background-color: #f1f3f5;
+            }
+
+    .resume-btn {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+        .resume-btn:hover {
+            background-color: #218838;
+            color: white;
+        }
+
+    .status-select {
+        width: 120px;
+        padding: 5px;
+        border-radius: 5px;
+    }
+
+    .status-pending, .status-accepted, .status-rejected {
+        padding: 5px 10px;
+        border-radius: 12px;
+        color: white;
+        font-size: 0.9em;
+        display: inline-block;
+    }
+
+    .status-pending {
+        background-color: #ffc107;
+    }
+
+    .status-accepted {
+        background-color: #28a745;
+    }
+
+    .status-rejected {
+        background-color: #dc3545;
+    }
+
+    .update-btn {
+        background-color: #007bff;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+        .update-btn:hover {
+            background-color: #0056b3;
+        }
+
+    .no-resume {
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    /* Responsive adjustments */
+   (max-width: 768px) {
+        .table-container
+
+    {
+        padding: 10px;
+    }
+
+    .table th, .table td {
+        font-size: 0.9em;
+        padding: 8px;
+    }
+
+    .status-select {
+        width: 100px;
+    }
+
+    }
+</style>
+
+<div class="container table-container">
+    <h2 class="mb-4 text-center">All Job Applications</h2>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th scope="col" onclick="sortTable(0)">Email <i class="fas fa-sort"></i></th>
+                <th scope="col" onclick="sortTable(1)">Job <i class="fas fa-sort"></i></th>
+                <th scope="col">Resume</th>
+                <th scope="col" onclick="sortTable(3)">Date Applied <i class="fas fa-sort"></i></th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var app in Model)
+            {
+                <tr>
+                    <td>@app.User?.Email</td>
+                    <td>@app.Job?.Title</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(app.ResumePath))
+                        {
+                            <a href="@app.ResumePath" target="_blank" class="resume-btn">
+                                <i class="fas fa-file-pdf"></i> View Resume
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="no-resume">No Resume</span>
+                        }
+                    </td>
+                    <td>@app.AppliedOn.ToString("dd MMM yyyy")</td>
+                    <td>
+                        <form method="post" asp-action="UpdateStatus" class="d-flex align-items-center">
+                            <input type="hidden" name="applicationId" value="@app.Id" />
+                            <select name="status" class="form-select status-select me-2" onchange="updateStatusColor(this)">
+                                <option value="Pending" selected="@(app.Status == "Pending")" class="status-pending">Pending</option>
+                                <option value="Accepted" selected="@(app.Status == "Accepted")" class="status-accepted">Accepted</option>
+                                <option value="Rejected" selected="@(app.Status == "Rejected")" class="status-rejected">Rejected</option>
+                            </select>
+                            <button type="submit" class="btn update-btn"><i class="fas fa-check"></i> Update</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Include Bootstrap JS and Popper for form functionality -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Table sorting function
+    function sortTable(columnIndex) {
+        const table = document.querySelector("table");
+        const tbody = table.querySelector("tbody");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const isAscending = table.dataset.sortOrder !== "asc";
+        table.dataset.sortOrder = isAscending ? "asc" : "desc";
+
+        rows.sort((a, b) => {
+            const aText = a.cells[columnIndex].textContent.trim();
+            const bText = b.cells[columnIndex].textContent.trim();
+            return isAscending
+                ? aText.localeCompare(bText, undefined, { numeric: true })
+                : bText.localeCompare(aText, undefined, { numeric: true });
+        });
+
+        tbody.innerHTML = "";
+        rows.forEach(row => tbody.appendChild(row));
+    }
+
+    // Update status color on change
+    function updateStatusColor(select) {
+        const selectedOption = select.options[select.selectedIndex];
+        select.className = `form-select status-select ${selectedOption.className}`;
+    }
+
+    // Initialize status colors on page load
+    document.querySelectorAll(".status-select").forEach(select => {
+        updateStatusColor(select);
+    });
+</script>
