@@ -1,0 +1,432 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model ProfileViewModel
+
+@{
+    ViewData["Title"] = "My Profile";
+    var appliedJobIds = ViewBag.AppliedJobs as List<int> ?? new List<int>();
+}
+
+<!-- Include Bootstrap 5 CSS, Font Awesome, and Toastr for notifications -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
+<style>
+    body {
+        background-color: #f4f7fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .profile-container {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 0 15px;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+    .card-title {
+        font-size: 1.25rem;
+        color: #333;
+    }
+
+    .card-subtitle {
+        font-size: 1rem;
+        color: #6c757d;
+    }
+
+    .card-text {
+        font-size: 0.95rem;
+        color: #555;
+    }
+
+        .card-text strong {
+            color: #333;
+        }
+
+    .apply-btn {
+        background-color: #007bff;
+        border: none;
+        border-radius: 5px;
+        padding: 8px 15px;
+        transition: background-color 0.3s;
+    }
+
+        .apply-btn:hover {
+            background-color: #0056b3;
+        }
+
+    .applied-btn {
+        background-color: #6c757d;
+        border: none;
+        border-radius: 5px;
+        padding: 8px 15px;
+        cursor: not-allowed;
+    }
+
+    .unsave-btn {
+        border-radius: 5px;
+        padding: 8px 15px;
+        font-size: 0.9rem;
+        background-color: #dc3545;
+        color: #fff;
+        border: none;
+        transition: background-color 0.3s;
+        margin-left: 10px;
+    }
+
+        .unsave-btn:hover {
+            background-color: #c82333;
+        }
+
+    .file-input {
+        font-size: 0.9rem;
+    }
+
+    .alert-success, .alert-info, .alert-warning {
+        border-radius: 5px;
+        padding: 12px;
+        margin-bottom: 20px;
+    }
+
+    .profile-form .form-control, .profile-form .form-control:focus {
+        border-radius: 5px;
+        box-shadow: none;
+    }
+
+    .profile-form .form-label {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .section-header {
+        font-size: 1.5rem;
+        color: #333;
+        margin: 30px 0 20px;
+    }
+
+    /* Responsive adjustments */
+    (max-width: 768px) {
+        .card
+
+    {
+        margin-bottom: 15px;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+    }
+
+    .card-text {
+        font-size: 0.9rem;
+    }
+
+    .apply-btn, .unsave-btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    .unsave-btn {
+        margin-left: 5px;
+    }
+
+    .profile-form .form-control {
+        font-size: 0.9rem;
+    }
+
+    }
+</style>
+
+<div class="profile-container mt-0">
+    <h2 class="mb-3 text-center">My Profile</h2>
+
+    <!-- Success Message -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+        </div>
+    }
+
+    <!-- Profile Form -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Update Profile</h5>
+            <form asp-action="Index" method="post" enctype="multipart/form-data" class="profile-form">
+                <div class="mb-3">
+                    <label asp-for="FullName" class="form-label">Full Name</label>
+                    <input asp-for="FullName" class="form-control" required />
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" readonly />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Location" class="form-label">Location</label>
+                    <input asp-for="Location" class="form-control" />
+                    <span asp-validation-for="Location" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Bio" class="form-label">Skills</label>
+                    <textarea asp-for="Bio" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="Bio" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="ResumeFile" class="form-label">Upload Default Resume</label>
+                    <input asp-for="ResumeFile" type="file" accept=".pdf" class="form-control file-input" />
+                    <span asp-validation-for="ResumeFile" class="text-danger"></span>
+                    @if (!string.IsNullOrEmpty(Model.ResumePath))
+                    {
+                        <a href="@Model.ResumePath" target="_blank" class="text-primary mt-2 d-inline-block">
+                            <i class="fas fa-file-pdf me-1"></i> View Current Resume
+                        </a>
+                    }
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- My Applications -->
+    <h4 class="section-header">My Applications</h4>
+    @if (!Model.Applications.Any())
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> You haven't applied to any jobs yet.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var app in Model.Applications)
+            {
+                @if (app.Job == null)
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Job data is missing for an application.
+                    </div>
+                    continue;
+                }
+                <div class="col-md-4 col-sm-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">@app.Job.Title</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">@app.Job.Company</h6>
+                            <p class="card-text">
+                                <strong>Applied On:</strong> @app.AppliedOn.ToShortDateString()<br />
+                                <strong>Description:</strong> @app.Job.Description<br />
+                                <strong>Job Type:</strong> @app.Job.JobType<br />
+                                <strong>Skills:</strong> @app.Job.SkillsCsv
+                            </p>
+                            <button class="btn btn-sm applied-btn" disabled>
+                                <i class="fas fa-check me-1"></i> Applied
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Saved Jobs -->
+    <h4 class="section-header">Saved Jobs</h4>
+    @if (!Model.SavedJobs.Any())
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> You haven't saved any jobs yet.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var saved in Model.SavedJobs)
+            {
+                @if (saved.Job == null)
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Job data is missing for a saved job.
+                    </div>
+                    continue;
+                }
+                <div class="col-md-4 col-sm-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">@saved.Job.Title</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">@saved.Job.Company</h6>
+                            <p class="card-text">
+                                <strong>Description:</strong> @saved.Job.Description<br />
+                                <strong>Job Type:</strong> @saved.Job.JobType<br />
+                                <strong>Skills:</strong> @saved.Job.SkillsCsv
+                            </p>
+                            <div class="d-flex align-items-center">
+                                @if (appliedJobIds.Contains(saved.Job.Id))
+                                {
+                                    <button class="btn btn-sm applied-btn" disabled>
+                                        <i class="fas fa-check me-1"></i> Applied
+                                    </button>
+                                }
+                                else
+                                {
+                                    <form asp-action="Apply" asp-controller="Job" enctype="multipart/form-data" method="post" class="apply-form me-2">
+                                        <input type="hidden" name="jobId" value="@saved.Job.Id" />
+                                        <div class="mb-2">
+                                            <input type="file" name="resumeFile" accept=".pdf" required class="form-control form-control-sm file-input" />
+                                            <div class="invalid-feedback">
+                                                Please upload a PDF resume.
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-sm apply-btn">
+                                            <i class="fas fa-upload me-1"></i> Apply with Resume
+                                        </button>
+                                    </form>
+                                }
+                                <form method="post" asp-action="UnsaveJob" asp-controller="Job" class="unsave-form">
+                                    <input type="hidden" name="jobId" value="@saved.Job.Id" />
+                                    <button type="submit" class="btn btn-sm unsave-btn" data-job-id="@saved.Job.Id">
+                                        <i class="fas fa-trash me-1"></i> Remove
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Include Bootstrap JS, Toastr, jQuery, and jQuery Validation -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Client-side form validation for Profile
+        $('.profile-form').validate({
+            rules: {
+                FullName: {
+                    required: true,
+                    maxlength: 100
+                },
+                Location: {
+                    maxlength: 100
+                },
+                Bio: {
+                    maxlength: 500
+                },
+                ResumeFile: {
+                    accept: "application/pdf"
+                }
+            },
+            messages: {
+                FullName: {
+                    required: "Please enter your full name.",
+                    maxlength: "Full name cannot exceed 100 characters."
+                },
+                Location: {
+                    maxlength: "Location cannot exceed 100 characters."
+                },
+                Bio: {
+                    maxlength: "Bio cannot exceed 500 characters."
+                },
+                ResumeFile: {
+                    accept: "Please upload a PDF file."
+                }
+            },
+            errorElement: 'span',
+            errorClass: 'text-danger',
+            highlight: function (element) {
+                $(element).addClass('is-invalid');
+            },
+            unhighlight: function (element) {
+                $(element).removeClass('is-invalid');
+            },
+            submitHandler: function (form) {
+                const fileInput = $(form).find('input[type="file"]')[0];
+                if (fileInput.files[0] && !fileInput.files[0].name.endsWith('.pdf')) {
+                    toastr.error('Only PDF files are allowed for resume upload.');
+                    $(fileInput).addClass('is-invalid');
+                    return;
+                }
+                form.submit();
+                toastr.success('Profile updated successfully!');
+            }
+        });
+
+        // Client-side validation for Apply forms
+        $('.apply-form').on('submit', function (e) {
+            const fileInput = $(this).find('input[type="file"]')[0];
+            if (!fileInput.files[0]) {
+                e.preventDefault();
+                $(fileInput).addClass('is-invalid');
+                toastr.error('Please select a PDF file to upload.');
+                return;
+            }
+            if (!fileInput.files[0].name.endsWith('.pdf')) {
+                e.preventDefault();
+                $(fileInput).addClass('is-invalid');
+                toastr.error('Only PDF files are allowed.');
+                return;
+            }
+            toastr.success('Application submitted successfully!');
+        });
+
+        // Remove invalid class when user selects a new file
+        $('.file-input').on('change', function () {
+            $(this).removeClass('is-invalid');
+        });
+
+        // Unsave Job form submission with AJAX
+        $('.unsave-form').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const button = form.find('.unsave-btn');
+            const jobId = button.data('job-id');
+            const card = button.closest('.card');
+            const url = form.attr('action');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: form.serialize(),
+                success: function (response) {
+                    if (response.success) {
+                        card.closest('.col-md-4').fadeOut(300, function () {
+                            $(this).remove();
+                            if ($('.saved-jobs .card').length === 0) {
+                                $('.saved-jobs').replaceWith('<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i> You haven\'t saved any jobs yet.</div>');
+                            }
+                        });
+                        toastr.success('Job removed from saved list!');
+                    } else {
+                        toastr.error(response.message || 'Failed to remove job.');
+                    }
+                },
+                error: function () {
+                    toastr.error('An error occurred while processing your request.');
+                }
+            });
+        });
+    });
+
+    // Toastr options
+    toastr.options = {
+        positionClass: "toast-top-right",
+        timeOut: 3000,
+        progressBar: true
+    };
+</script>
