@@ -10,6 +10,8 @@
         public string ResumePath { get; set; }
         public ApplicationUser User { get; set; }
         public Job Job { get; set; }
+
+       
     }
 
 

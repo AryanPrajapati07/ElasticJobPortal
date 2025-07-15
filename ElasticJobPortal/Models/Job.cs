@@ -6,6 +6,7 @@ namespace ElasticJobPortal.Models
 {
     public class Job
     {
+
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Title is required")]

@@ -1,13 +1,13 @@
-﻿
-using ElasticJobPortal.Models;
+﻿using ElasticJobPortal.Models;
 using ElasticJobPortal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using X.PagedList;
+using X.PagedList.Extensions;
 
 namespace ElasticJobPortal.Controllers
 {
@@ -15,14 +15,14 @@ namespace ElasticJobPortal.Controllers
 
     public class JobController : Controller
     {
-        
+
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _usermanager;
 
 
-        public JobController(ApplicationDbContext context,UserManager<ApplicationUser> userManager)
+        public JobController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
-           
+
             _context = context;
             _usermanager = userManager;
         }
@@ -78,9 +78,6 @@ namespace ElasticJobPortal.Controllers
             return RedirectToAction("AllApplications");
         }
 
-
-
-
         public IActionResult List()
         {
             var jobs = _context.Jobs.ToList();
@@ -94,22 +91,24 @@ namespace ElasticJobPortal.Controllers
         {
             var userId = _usermanager.GetUserId(User);
 
+            // ✅ Check if already applied
             var alreadyApplied = await _context.JobApplications
                 .AnyAsync(a => a.JobId == jobId && a.UserId == userId);
 
             if (alreadyApplied)
             {
-                TempData["ErrorMessage"] = "You already applied for this job.";
+                TempData["ErrorMessage"] = "You have already applied for this job.";
                 return RedirectToAction("AvailableJobs");
             }
 
-            // ✅ Save resume to wwwroot/resumes
+            // ✅ Upload resume
             string resumePath = null;
             if (resumeFile != null && resumeFile.Length > 0)
             {
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/resumes");
                 Directory.CreateDirectory(uploadsFolder); // Ensure folder exists
-                var uniqueFileName = $"{Guid.NewGuid()}_{resumeFile.FileName}";
+
+                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(resumeFile.FileName)}";
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
@@ -120,9 +119,10 @@ namespace ElasticJobPortal.Controllers
                 resumePath = $"/resumes/{uniqueFileName}";
             }
 
+            // ✅ Save to DB
             var application = new JobApplication
             {
-                JobId = jobId,
+                JobId = jobId, 
                 UserId = userId,
                 AppliedOn = DateTime.Now,
                 ResumePath = resumePath
@@ -131,11 +131,31 @@ namespace ElasticJobPortal.Controllers
             _context.JobApplications.Add(application);
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Applied successfully!";
+            // ✅ Send Email to Admin
+
+          
+
+            var job = await _context.Jobs.FindAsync(jobId);
+            var emailService = new EmailService();
+
+            var emailBody = $@"
+    <h3>📄 New Job Application </h3>
+    <p><strong>Job Title:</strong> {job?.Title}</p>
+    <p><strong>Company:</strong> {job?.Company}</p>
+    <p><strong>Applied On:</strong> {DateTime.Now.ToString("f")}</p>";
+
+            if (!string.IsNullOrEmpty(resumePath))
+            {
+                var fullResumeUrl = $"{Request.Scheme}://{Request.Host}{resumePath}";
+                emailBody += $"<p><strong>Resume:</strong> <a href='{fullResumeUrl}'>View Resume</a></p>";
+            }
+
+            await emailService.SendEmailAsync("aryanprajapati5523@gmail.com", "New Job Application",
+               emailBody);
+
+            TempData["SuccessMessage"] = "Application submitted successfully!";
             return RedirectToAction("AvailableJobs");
         }
-
-
 
 
         [Authorize(Roles = "JobSeeker")]
@@ -167,26 +187,37 @@ namespace ElasticJobPortal.Controllers
             return RedirectToAction("Search");
         }
 
-        [Authorize(Roles = "JobSeeker")]
-        public async Task<IActionResult> AvailableJobs()
+
+
+        // Update the problematic line in the AvailableJobs method
+        [Authorize(Roles = "JobSeeker")]
+        public async Task<IActionResult> AvailableJobs(string keyword, int page = 1)
         {
-            var jobs = await _context.Jobs.ToListAsync();
             var userId = _usermanager.GetUserId(User);
 
+            // Get applied job IDs
             var appliedJobIds = await _context.JobApplications
                 .Where(a => a.UserId == userId)
                 .Select(a => a.JobId)
                 .ToListAsync();
 
+            // No sorting applied here
+            var jobsQuery = _context.Jobs
+                .Where(j =>
+                    string.IsNullOrEmpty(keyword) ||
+                    j.Title.Contains(keyword) ||
+                    j.Description.Contains(keyword)
+                );
+
+            int pageSize = 6;
+
+            var pagedJobs = jobsQuery.AsEnumerable().ToPagedList(page, pageSize);
+
             ViewBag.AppliedJobs = appliedJobIds;
+            ViewBag.Keyword = keyword;
 
-            return View(jobs);
+            return View(pagedJobs);
         }
-
-
-
-
-
 
 
     }

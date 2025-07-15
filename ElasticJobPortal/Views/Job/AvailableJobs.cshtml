@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@model List<ElasticJobPortal.Models.Job>
+@model X.PagedList.IPagedList<ElasticJobPortal.Models.Job>
+
 @{
     ViewData["Title"] = "Available Jobs";
     var appliedJobIds = ViewBag.AppliedJobs as List<int> ?? new List<int>();
@@ -82,8 +83,55 @@
         margin-bottom: 20px;
     }
 
+    /* Pagination Styles */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+        .pagination .page-item {
+            transition: all 0.3s ease;
+        }
+
+        .pagination .page-link {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            color: #333;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+            .pagination .page-link:hover {
+                background-color: #007bff;
+                color: #fff;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            }
+
+        .pagination .page-item.active .page-link {
+            background-color: #007bff;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            background-color: #f4f7fa;
+            color: #6c757d;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
     /* Responsive adjustments */
-     (max-width: 768px) {
+    (max-width: 768px) {
         .card
 
     {
@@ -95,6 +143,11 @@
     }
 
     .card-text {
+        font-size: 0.9rem;
+    }
+
+    .pagination .page-link {
+        padding: 8px 12px;
         font-size: 0.9rem;
     }
 
@@ -157,6 +210,25 @@
             </div>
         }
     </div>
+
+    <!-- Updated Pagination -->
+    <div class="pagination-container">
+        @using X.PagedList.Mvc.Core
+        <nav aria-label="Page navigation">
+            @Html.PagedListPager(Model, page => Url.Action("AvailableJobs", new { page, keyword = ViewBag.Keyword }),
+                        new PagedListRenderOptions
+                        {
+                            UlElementClasses = new[] { "pagination", "pagination-sm" },
+                            LiElementClasses = new[] { "page-item" },
+                            PageClasses = new[] { "page-link" },
+                            DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+                            DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+                            DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+                            DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+                            MaximumPageNumbersToDisplay = 5
+                        })
+        </nav>
+    </div>
 </div>
 
 <!-- Include Bootstrap JS, Toastr, and jQuery -->
@@ -181,7 +253,7 @@
                 return;
             }
 
-            // Show success toast (assuming server-side validation passes26/04/2023 16:25:49
+            // Show success toast (assuming server-side validation passes)
             toastr.success('Application submitted successfully!');
         });
 
