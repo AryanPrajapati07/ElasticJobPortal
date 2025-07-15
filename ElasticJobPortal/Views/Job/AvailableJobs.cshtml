@@ -4,6 +4,7 @@
 @{
     ViewData["Title"] = "Available Jobs";
     var appliedJobIds = ViewBag.AppliedJobs as List<int> ?? new List<int>();
+    var savedJobIds = ViewBag.SavedJobs as List<int> ?? new List<int>(); // New: List of saved job IDs
 }
 
 <!-- Include Bootstrap 5 CSS, Font Awesome, and Toastr for notifications -->
@@ -83,6 +84,37 @@
         margin-bottom: 20px;
     }
 
+    /* Save Job Button Styles */
+    .save-btn {
+        border-radius: 5px;
+        padding: 8px 15px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        margin-left: 10px;
+    }
+
+        .save-btn.saved {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+        }
+
+            .save-btn.saved:hover {
+                background-color: #218838;
+            }
+
+        .save-btn:not(.saved) {
+            background-color: #fff;
+            color: #333;
+            border: 1px solid #6c757d;
+        }
+
+            .save-btn:not(.saved):hover {
+                background-color: #f8f9fa;
+                border-color: #007bff;
+                color: #007bff;
+            }
+
     /* Pagination Styles */
     .pagination-container {
         display: flex;
@@ -151,6 +183,12 @@
         font-size: 0.9rem;
     }
 
+    .save-btn {
+        margin-left: 5px;
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
     }
 </style>
 
@@ -184,34 +222,43 @@
                             <strong>Job Type:</strong> @job.JobType<br />
                             <strong>Skills:</strong> @job.SkillsCsv
                         </p>
-                        @if (appliedJobIds.Contains(job.Id))
-                        {
-                            <button class="btn btn-sm applied-btn" disabled>
-                                <i class="fas fa-check me-1"></i> Applied
-                            </button>
-                        }
-                        else
-                        {
-                            <form asp-action="Apply" asp-controller="Job" enctype="multipart/form-data" method="post" class="apply-form">
-                                <input type="hidden" name="jobId" value="@job.Id" />
-                                <div class="mb-2">
-                                    <input type="file" name="resumeFile" accept=".pdf" required class="form-control form-control-sm file-input" />
-                                    <div class="invalid-feedback">
-                                        Please upload a PDF resume.
+                        <div class="d-flex align-items-center">
+                            @if (appliedJobIds.Contains(job.Id))
+                            {
+                                <button class="btn btn-sm applied-btn" disabled>
+                                    <i class="fas fa-check me-1"></i> Applied
+                                </button>
+                            }
+                            else
+                            {
+                                <form asp-action="Apply" asp-controller="Job" enctype="multipart/form-data" method="post" class="apply-form me-2">
+                                    <input type="hidden" name="jobId" value="@job.Id" />
+                                    <div class="mb-2">
+                                        <input type="file" name="resumeFile" accept=".pdf" required class="form-control form-control-sm file-input" />
+                                        <div class="invalid-feedback">
+                                            Please upload a PDF resume.
+                                        </div>
                                     </div>
-                                </div>
-                                <button type="submit" class="btn btn-sm apply-btn">
-                                    <i class="fas fa-upload me-1"></i> Apply with Resume
+                                    <button type="submit" class="btn btn-sm apply-btn">
+                                        <i class="fas fa-upload me-1"></i> Apply with Resume
+                                    </button>
+                                </form>
+                            }
+                            <form method="post" asp-action="SaveJob" asp-controller="Job" class="save-form">
+                                <input type="hidden" name="jobId" value="@job.Id" />
+                                <button type="submit" class="btn btn-sm save-btn @(savedJobIds.Contains(job.Id) ? "saved" : "")" data-job-id="@job.Id">
+                                    <i class="fas @(savedJobIds.Contains(job.Id) ? "fa-heart" : "fa-heart") me-1"></i>
+                                    @(savedJobIds.Contains(job.Id) ? "Saved" : "Save Job")
                                 </button>
                             </form>
-                        }
+                        </div>
                     </div>
                 </div>
             </div>
         }
     </div>
 
-    <!-- Updated Pagination -->
+    <!-- Pagination -->
     <div class="pagination-container">
         @using X.PagedList.Mvc.Core
         <nav aria-label="Page navigation">
@@ -237,7 +284,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>
     $(document).ready(function () {
-        // Client-side form validation and Toastr notifications
+        // Client-side form validation and Toastr notifications for Apply
         $('.apply-form').on('submit', function (e) {
             const fileInput = $(this).find('input[type="file"]')[0];
             if (!fileInput.files[0]) {
@@ -252,14 +299,42 @@
                 toastr.error('Only PDF files are allowed.');
                 return;
             }
-
-            // Show success toast (assuming server-side validation passes)
             toastr.success('Application submitted successfully!');
         });
 
         // Remove invalid class when user selects a new file
         $('.file-input').on('change', function () {
             $(this).removeClass('is-invalid');
+        });
+
+        // Save Job form submission with AJAX
+        $('.save-form').on('submit', function (e) {
+            e.preventDefault();
+            const form = $(this);
+            const button = form.find('.save-btn');
+            const jobId = button.data('job-id');
+            const isSaved = button.hasClass('saved');
+            const url = form.attr('action');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: form.serialize(),
+                success: function (response) {
+                    if (response.success) {
+                        if (isSaved) {
+                            button.removeClass('saved').html('<i class="fas fa-heart me-1"></i> Save Job');
+                            toastr.success('Job unsaved successfully!');
+                        } else {
+                            button.addClass('saved').html('<i class="fas fa-heart me-1"></i> Saved');
+                            toastr.success('Job saved successfully!');
+                        }
+                    }
+                },
+                error: function () {
+                    toastr.error('An error occurred while processing your request.');
+                }
+            });
         });
     });
 

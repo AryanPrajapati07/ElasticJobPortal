@@ -122,7 +122,7 @@ namespace ElasticJobPortal.Controllers
             // ✅ Save to DB
             var application = new JobApplication
             {
-                JobId = jobId, 
+                JobId = jobId,
                 UserId = userId,
                 AppliedOn = DateTime.Now,
                 ResumePath = resumePath
@@ -133,7 +133,7 @@ namespace ElasticJobPortal.Controllers
 
             // ✅ Send Email to Admin
 
-          
+
 
             var job = await _context.Jobs.FindAsync(jobId);
             var emailService = new EmailService();
@@ -220,5 +220,54 @@ namespace ElasticJobPortal.Controllers
         }
 
 
+
+        [HttpPost]
+        [Authorize(Roles = "JobSeeker")]
+        public async Task<IActionResult> SaveJob(int jobId)
+        {
+            var userId = _usermanager.GetUserId(User);
+            // Check if already saved
+            var alreadySaved = await _context.SavedJobs
+                .AnyAsync(s => s.JobId == jobId && s.UserId == userId);
+            if (!alreadySaved)
+            {
+                _context.SavedJobs.Add(new SavedJob
+                {
+                    JobId = jobId,
+                    UserId = userId,
+                    SavedOn = DateTime.Now
+                });
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("AvailableJobs");
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "JobSeeker")]
+        public async Task<IActionResult> UnsaveJob(int jobId)
+        {
+            var userId = _usermanager.GetUserId(User);
+            var savedJob = await _context.SavedJobs
+                .FirstOrDefaultAsync(s => s.JobId == jobId && s.UserId == userId);
+            if (savedJob != null)
+            {
+                _context.SavedJobs.Remove(savedJob);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("AvailableJobs");
+        }
+
+        [Authorize(Roles = "JobSeeker")]
+        public async Task<IActionResult> SavedJobs(int page = 1)
+        {
+            var userId = _usermanager.GetUserId(User);
+            var saved = await _context.SavedJobs
+                .Include(s => s.Job)
+                .Where(s => s.UserId == userId)
+                .ToListAsync();
+            return View(saved);
+
+        }
     }
 }
