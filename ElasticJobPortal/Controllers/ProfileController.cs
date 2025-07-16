@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace ElasticJobPortal.Controllers
 {
@@ -72,6 +73,55 @@ namespace ElasticJobPortal.Controllers
             TempData["SuccessMessage"] = "Profile updated successfully!";
             return RedirectToAction("Index");
         }
+
+        [Authorize(Roles = "JobSeeker")]
+        public async Task<IActionResult> PublicProfile(string id)
+        {
+            var user = await _usermanager.FindByIdAsync(id);
+            if (user == null)             {
+                return NotFound();
+            }
+            return View(user);
+
+        }
+
+        [Authorize(Roles ="JobSeeker")]
+        public async Task<IActionResult> Dashboard() 
+        {
+            var user = await _usermanager.GetUserAsync(User);
+            var applications = await _context.JobApplications
+                .Where(a => a.UserId == user.Id)
+                .CountAsync();
+            var saved = await _context.SavedJobs
+                .Where(s => s.UserId == user.Id)
+                .CountAsync();
+
+            ViewBag.ApplicationsCount = applications;
+            ViewBag.SavedJobsCount = saved;
+            return View(user);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadResume(IFormFile resumeFile)
+        {
+
+            var user = await _usermanager.GetUserAsync(User);
+            if (resumeFile != null && resumeFile.Length>0)
+            {
+                var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "resumes");
+                Directory.CreateDirectory(uploads);
+                var fileName = $"{Guid.NewGuid()}_{resumeFile.FileName}";
+                var filePath = Path.Combine(uploads, fileName);
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await resumeFile.CopyToAsync(stream);
+
+                user.ResumePath = $"/resumes/{fileName}";
+                await _usermanager.UpdateAsync(user);
+            }
+            return RedirectToAction("Dashboard");
+
+        }
+
 
     }
 }

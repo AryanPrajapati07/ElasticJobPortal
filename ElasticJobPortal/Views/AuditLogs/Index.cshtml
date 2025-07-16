@@ -1,0 +1,27 @@
+﻿@model List<JobApplication>
+
+<h2>Application Logs</h2>
+<a href="/AuditLogs/ExportCSV" class="btn btn-success btn-sm mb-3">Download CSV</a>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Company Name</th>
+        <th>Job</th>
+        <th>Applicant</th>
+        <th>Email</th>
+        <th>Applied On</th>
+        <th>Status</th>
+    </tr>
+    @foreach (var app in Model)
+    {
+        <tr>
+            <td>@app.Job?.Company</td>
+            <td>@app.Job?.Title</td>
+            <td>@app.User?.FullName</td>
+            <td>@app.User?.Email</td>
+            <td>@app.AppliedOn.ToString("g")</td>
+            <td>@app.Status</td>
+        </tr>
+    }
+</table>
+

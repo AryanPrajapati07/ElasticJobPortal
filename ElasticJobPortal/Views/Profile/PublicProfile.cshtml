@@ -1,0 +1,18 @@
+﻿@model ApplicationUser
+@{
+    ViewData["Title"] = "Public Profile";
+}
+
+<h2>@Model.FullName</h2>
+<p><strong>Email:</strong> @Model.Email</p>
+<p><strong>Location:</strong> @Model.Location</p>
+<p><strong>Bio:</strong> @Model.Bio</p>
+
+@if (!string.IsNullOrEmpty(Model.ResumePath))
+{
+    <a href="@Model.ResumePath" class="btn btn-sm btn-primary" download>Download Resume</a>
+}
+else
+{
+    <p>No resume uploaded.</p>
+}

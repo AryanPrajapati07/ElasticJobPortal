@@ -190,7 +190,8 @@ namespace ElasticJobPortal.Controllers
 
 
         // Update the problematic line in the AvailableJobs method
-        [Authorize(Roles = "JobSeeker")]
+        [Authorize(Roles = "JobSeeker")]
+
         public async Task<IActionResult> AvailableJobs(string keyword, int page = 1)
         {
             var userId = _usermanager.GetUserId(User);

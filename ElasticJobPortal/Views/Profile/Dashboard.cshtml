@@ -1,0 +1,11 @@
+﻿@model ApplicationUser
+
+<h2>Welcome, @Model.FullName</h2>
+<p><strong>Email:</strong> @Model.Email</p>
+<p><strong>Saved Jobs:</strong> @ViewBag.SavedJobCount</p>
+<p><strong>Applications:</strong> @ViewBag.ApplicationCount</p>
+
+<form asp-action="UploadResume" asp-controller="Profile" method="post" enctype="multipart/form-data">
+    <input type="file" name="resumeFile" class="form-control mb-2" required />
+    <button class="btn btn-primary btn-sm">Update Resume</button>
+</form>
