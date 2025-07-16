@@ -15,6 +15,12 @@ namespace ElasticJobPortal.Services
         public DbSet<JobApplication> JobApplications { get; set; }
         public DbSet<SavedJob> SavedJobs { get; set; }
 
+        public DbSet<QuizCategory> QuizCategories { get; set; }
+        public DbSet<QuizQuestion> QuizQuestions { get; set; }
+        public DbSet<QuizAnswer> QuizAnswers { get; set; }
+        public DbSet<QuizResult> QuizResults { get; set; }
+
+
 
 
     }

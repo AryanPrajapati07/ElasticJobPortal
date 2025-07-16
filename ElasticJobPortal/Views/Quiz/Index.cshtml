@@ -1,0 +1,75 @@
+﻿@model List<QuizCategory>
+
+<section class="container mx-auto px-4 py-8">
+    <h2 class="text-3xl font-bold text-center mb-6 text-gray-800">Choose Your Quiz Category</h2>
+
+    <!-- Search Input -->
+    <div class="mb-6 max-w-md mx-auto">
+        <label for="category-search" class="sr-only">Search categories</label>
+        <input id="category-search" type="text" placeholder="Search categories..."
+               class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+               onkeyup="filterCategories()"
+               aria-describedby="search-help">
+        <p id="search-help" class="text-sm text-gray-500 mt-1">Type to filter quiz categories</p>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="hidden text-center text-gray-500">Loading categories...</div>
+
+    <!-- Category List -->
+    <ul id="category-list" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" role="list">
+        @if (Model == null || !Model.Any())
+        {
+            <li class="col-span-full text-center text-gray-500 py-8" role="alert">
+                No quiz categories available at the moment.
+            </li>
+        }
+        else
+        {
+            @foreach (var cat in Model)
+            {
+                <li class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200"
+                    data-name="@cat.Name.ToLower()">
+                    <a href="@Url.Action("Start", "Quiz", new { categoryId = cat.Id })"
+                       class="block p-5 text-blue-600 hover:text-blue-800 focus:ring-2 focus:ring-blue-500 rounded-lg"
+                       role="link"
+                       aria-label="Start @cat.Name Quiz"
+                       tabindex="0">
+                        <h3 class="text-lg font-semibold mb-2">@cat.Name Quiz</h3>
+                        <p class="text-sm text-gray-600">
+                            "Test your knowledge in this exciting quiz category!"
+                        </p>
+                    </a>
+                </li>
+            }
+        }
+    </ul>
+</section>
+
+<!-- Include Tailwind CSS CDN -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+<!-- JavaScript for Filtering -->
+<script>
+    function filterCategories() {
+        const searchInput = document.getElementById('category-search').value.toLowerCase();
+        const categories = document.querySelectorAll('#category-list li');
+
+        categories.forEach(category => {
+            const name = category.getAttribute('data-name');
+            category.style.display = name.includes(searchInput) ? '' : 'none';
+        });
+    }
+
+    // Simulate loading state (optional, can be tied to actual data fetching)
+    document.addEventListener('DOMContentLoaded', () => {
+        const loading = document.getElementById('loading');
+        const categoryList = document.getElementById('category-list');
+
+        loading.classList.remove('hidden');
+        setTimeout(() => {
+            loading.classList.add('hidden');
+            categoryList.classList.remove('hidden');
+        }, 500); // Simulate 500ms loading
+    });
+</script>

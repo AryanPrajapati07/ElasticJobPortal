@@ -1,0 +1,75 @@
+﻿@model QuizResult
+
+<section class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-center mb-6 text-gray-800">Quiz Results</h1>
+
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+        <!-- Category and Date -->
+        <div class="mb-4">
+            <p class="text-lg font-semibold text-gray-700">Category: <span class="text-blue-600">@Model.Category.Name</span></p>
+            <p class="text-sm text-gray-500">Taken On: @Model.TakenOn.ToString("MMMM dd, yyyy h:mm tt")</p>
+        </div>
+
+        <!-- Score Display -->
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Your Score</h2>
+            @{
+                var percentage = Model.TotalQuestions > 0 ? (Model.Score * 100.0 / Model.TotalQuestions) : 0;
+                var isPassing = percentage >= 70; // Assuming 70% is passing
+            }
+            <p class="text-4xl font-semibold mt-2 @((isPassing ? "text-green-600" : "text-red-600"))">
+                @Model.Score / @Model.TotalQuestions
+                <span class="text-lg">(@percentage.ToString("F1")%)</span>
+            </p>
+            <p class="text-lg mt-2 @((isPassing ? "text-green-600" : "text-red-600"))">
+                @(isPassing ? "🎉 Passed!" : "😔 Try Again")
+            </p>
+        </div>
+
+        <!-- Progress Circle -->
+        <div class="flex justify-center mb-6">
+            <div class="relative w-32 h-32">
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                    <circle class="text-gray-200 stroke-current" stroke-width="10" cx="50" cy="50" r="40" fill="transparent"></circle>
+                    <circle class="text-blue-600 progress-ring stroke-current" stroke-width="10" stroke-linecap="round" cx="50" cy="50" r="40" fill="transparent" stroke-dasharray="251.2" stroke-dashoffset="@((251.2 * (1 - percentage / 100)).ToString("F1"))"></circle>
+                </svg>
+                <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-semibold text-gray-800">
+                    @percentage.ToString("F0")%
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Taken (if available) -->
+        @* @if (Model.TimeTaken != null)
+        {
+            <p class="text-center text-gray-600 mb-4">
+                Time Taken: @Model.TimeTaken.Value.ToString(@"mm\:ss")
+            </p>
+        } *@
+
+        <!-- Actions -->
+        <div class="flex justify-center gap-4">
+            <a href="@Url.Action("Start", "Quiz", new { categoryId = Model.Category.Id })"
+               class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+               role="button" aria-label="Try @Model.Category.Name Quiz Again">
+                Try Again
+            </a>
+            <a href="@Url.Action("Index", "Quiz")"
+               class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-gray-500"
+               role="button" aria-label="Return to Quiz Categories">
+                Back to Categories
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Include Tailwind CSS CDN -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+<style>
+    .progress-ring {
+        transition: stroke-dashoffset 0.5s ease-in-out;
+        transform: rotate(-90deg);
+        transform-origin: 50% 50%;
+    }
+</style>
