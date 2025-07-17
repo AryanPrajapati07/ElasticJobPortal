@@ -1,0 +1,13 @@
+﻿@model ElasticJobPortal.Models.QuizQuestion
+
+<h2>Confirm Delete</h2>
+
+<div class="alert alert-warning">
+    Are you sure you want to delete the question: <strong>@Model.QuestionText</strong>?
+</div>
+
+<form asp-action="DeleteQuestion" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+    <a asp-action="ListQuestions" class="btn btn-secondary">Cancel</a>
+</form>

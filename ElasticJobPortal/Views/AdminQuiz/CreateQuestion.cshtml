@@ -1,26 +1,140 @@
 ﻿@model ElasticJobPortal.Models.QuizQuestion
 
-<form asp-action="CreateQuestion" method="post">
-    <input type="hidden" asp-for="CategoryId" />
+<section class="container mx-auto px-4 py-8" >
+    <h1 class="text-3xl font-bold text-center mb-0 text-gray-800" style="margin-top:-50px;">Create New Question</h1>
 
-    <div class="mb-3">
-        <label>Question:</label>
-        <input asp-for="QuestionText" class="form-control" />
+    <!-- Category Information -->
+    <div class="mb-6 text-center">
+        <p class="text-lg text-gray-700">Adding question to : <span class="font-semibold text-blue-600"> @ViewBag.CategoryName</span></p>
     </div>
 
-    <div class="mb-3">
-        <label>Answers:</label>
-        @for (int i = 0; i < Model.Answers.Count; i++)
-        {
-            <div class="input-group mb-2">
-                <input asp-for="Answers[@i].AnswerText" class="form-control" placeholder="Answer Text" />
-                <span class="input-group-text">
-                    <input asp-for="Answers[@i].IsCorrect" type="checkbox" />
-                    Correct
-                </span>
+    <form id="questionForm" asp-action="CreateQuestion" method="post" class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <input type="hidden" asp-for="CategoryId" />
+
+        <!-- Question Input -->
+        <div class="mb-6">
+            <label for="QuestionText" class="block text-sm font-medium text-gray-700 mb-2">Question</label>
+            <input asp-for="QuestionText" 
+                   class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   placeholder="Enter your question here"
+                   required
+                   aria-describedby="question-error" />
+            <span asp-validation-for="QuestionText" class="text-red-600 text-sm mt-1 hidden" id="question-error"></span>
+        </div>
+
+        <!-- Answers Section -->
+        <div class="mb-6">
+            <div class="flex justify-between items-center mb-3">
+                <label class="block text-sm font-medium text-gray-700">Answers</label>
+                <button type="button" 
+                        onclick="addAnswerField()" 
+                        class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 focus:ring-2 focus:ring-green-500"
+                        aria-label="Add New Answer">
+                    + Add Answer
+                </button>
             </div>
-        }
-    </div>
+            <div id="answers-container">
+                @for (int i = 0; i < Model.Answers.Count; i++)
+                {
+                    <div class="flex items-center mb-3 answer-field" data-index="@i">
+                        <input asp-for="Answers[@i].AnswerText" 
+                               class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="Enter answer text"
+                               required
+                               aria-describedby="answer-error-@i" />
+                        <label class="ml-3 flex items-center text-sm text-gray-700">
+                            <input asp-for="Answers[@i].IsCorrect" type="checkbox" 
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500" />
+                            <span class="ml-1">Correct</span>
+                        </label>
+                        <button type="button" 
+                                onclick="removeAnswerField(this)" 
+                                class="ml-3 text-red-600 hover:text-red-800 focus:ring-2 focus:ring-red-500"
+                                aria-label="Remove Answer"
+                                @(i < 2 ? "disabled" : "")>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                        <span asp-validation-for="Answers[@i].AnswerText" class="text-red-600 text-sm mt-1 hidden" id="answer-error-@i"></span>
+                    </div>
+                }
+            </div>
+            <p id="answers-error" class="text-red-600 text-sm mt-1 hidden">At least one answer must be marked as correct.</p>
+        </div>
 
-    <button type="submit" class="btn btn-primary">Save Question</button>
-</form>
+        <!-- Form Actions -->
+        <div class="flex justify-end gap-4">
+            <a href="@Url.Action("Index", "AdminQuiz")" 
+               class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-gray-500"
+               role="button" aria-label="Cancel and return to categories">
+                Cancel
+            </a>
+            <button type="submit" 
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+                    onclick="return validateForm()"
+                    aria-label="Save Question">
+                Save Question
+            </button>
+        </div>
+    </form>
+</section>
+
+<!-- Include Tailwind CSS CDN -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+<!-- Client-Side Validation and Dynamic Fields -->
+<script>
+    let answerIndex = @Model.Answers.Count;
+
+    function addAnswerField() {
+        const container = document.getElementById('answers-container');
+        const newField = document.createElement('div');
+        newField.className = 'flex items-center mb-3 answer-field';
+        newField.dataset.index = answerIndex;
+        newField.innerHTML = `
+            <input name="Answers[${answerIndex}].AnswerText" 
+                   class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   placeholder="Enter answer text"
+                   required
+                   aria-describedby="answer-error-${answerIndex}" />
+            <label class="ml-3 flex items-center text-sm text-gray-700">
+                <input name="Answers[${answerIndex}].IsCorrect" type="checkbox" 
+                       class="h-4 w-4 text-blue-600 focus:ring-blue-500" />
+                <span class="ml-1">Correct</span>
+            </label>
+            <button type="button" 
+                    onclick="removeAnswerField(this)" 
+                    class="ml-3 text-red-600 hover:text-red-800 focus:ring-2 focus:ring-red-500"
+                    aria-label="Remove Answer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <span class="text-red-600 text-sm mt-1 hidden" id="answer-error-${answerIndex}"></span>
+        `;
+        container.appendChild(newField);
+        answerIndex++;
+    }
+
+    function removeAnswerField(button) {
+        if (document.querySelectorAll('.answer-field').length > 2) {
+            button.parentElement.remove();
+        }
+    }
+
+    function validateForm() {
+        const answers = document.querySelectorAll('.answer-field');
+        const hasCorrectAnswer = Array.from(answers).some(answer => 
+            answer.querySelector('input[type="checkbox"]').checked
+        );
+        const errorElement = document.getElementById('answers-error');
+        
+        if (!hasCorrectAnswer) {
+            errorElement.classList.remove('hidden');
+            return false;
+        }
+        errorElement.classList.add('hidden');
+        return confirm('Are you sure you want to save this question?');
+    }
+</script>

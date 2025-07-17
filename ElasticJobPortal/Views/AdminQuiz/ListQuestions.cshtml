@@ -44,6 +44,7 @@ else
                 <th>Question</th>
                 <th>Category</th>
                 <th>Answers</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -62,6 +63,10 @@ else
                                 </li>
                             }
                         </ul>
+                    </td>
+                    <td>
+                        <a asp-action="EditQuestion" asp-route-id="@Model[i].Id" class="btn btn-sm btn-warning">Edit</a>
+                        <a asp-action="DeleteQuestion" asp-route-id="@Model[i].Id" class="btn btn-sm btn-danger">Delete</a>
                     </td>
                 </tr>
             }

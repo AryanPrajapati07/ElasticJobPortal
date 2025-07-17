@@ -1,15 +1,129 @@
 ﻿@model List<ElasticJobPortal.Models.QuizCategory>
-<h2>Categories</h2>
-<a href="/AdminQuiz/CreateCategory" class="btn btn-success mb-2">+ Add New</a>
-<table class="table">
-    <tr><th>Name</th><th>Description</th><th>Action</th></tr>
-    @foreach (var cat in Model)
-    {
-        <tr>
-            <td>@cat.Id</td>
-            <td>@cat.Name</td>
-            <td><a href="/AdminQuiz/CreateQuestion?categoryId=@cat.Id" class="btn btn-sm btn-info">Add Question</a></td>
-            <td><a href="/AdminQuiz/ListQuestions?categoryId=@cat.Id" class="btn btn-sm btn-info">View Question</a></td>
-        </tr>
+
+<section class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-center mb-6 text-gray-800">Quiz Categories</h1>
+
+    <!-- Add New Category Button and Search -->
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <a href="/AdminQuiz/CreateCategory"
+           class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500"
+           role="button" aria-label="Add New Quiz Category">
+            + Add New Category
+        </a>
+        <div class="w-full sm:w-64">
+            <label for="category-search" class="sr-only">Search categories</label>
+            <input id="category-search" type="text" placeholder="Search categories..."
+                   class="w-full p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                   onkeyup="filterCategories()"
+                   aria-describedby="search-help">
+            <p id="search-help" class="text-sm text-gray-500 mt-1">Type to filter categories</p>
+        </div>
+    </div>
+
+    <!-- Categories Table -->
+    <div class="overflow-x-auto">
+        <table class="w-full bg-white rounded-lg shadow-md">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="p-3 text-left text-gray-700 cursor-pointer" onclick="sortTable(0)">ID <span class="sort-icon">↕</span></th>
+                    <th class="p-3 text-left text-gray-700 cursor-pointer" onclick="sortTable(1)">Name <span class="sort-icon">↕</span></th>
+                    <th class="p-3 text-left text-gray-700">Add Questions</th>
+                    <th class="p-3 text-left text-gray-700">View Questions</th>
+                    
+                    <th class="p-3 text-left text-gray-700">Delete</th>
+                </tr>
+            </thead>
+            <tbody id="category-table">
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="text-center text-gray-500 py-8" role="alert">
+                            No quiz categories available.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var cat in Model)
+                    {
+                        <tr class="border-b hover:bg-gray-50" data-name="@cat.Name.ToLower()">
+                            <td class="p-3">@cat.Id</td>
+                            <td class="p-3">@cat.Name</td>
+                            <td class="p-3 flex gap-2 flex-wrap">
+                                <a href="/AdminQuiz/CreateQuestion?categoryId=@cat.Id"
+                                   class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+                                   role="button" aria-label="Add Question to @cat.Name">
+                                    Add Question
+                                </a>
+                                </td>
+                            <td class="p-3">
+                                <a href="/AdminQuiz/ListQuestions?categoryId=@cat.Id"
+                                   class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-teal-700 focus:ring-2 focus:ring-teal-500"
+                                   role="button" aria-label="View Questions for @cat.Name">
+                                    View Questions
+                                </a>
+                            </td>
+                            <td class="p-3">
+                           
+                                <a asp-action="DeleteCategory" asp-route-id="@cat.Id" class="btn btn-sm btn-danger">Delete</a>
+                            
+
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+
+<!-- Include Tailwind CSS CDN -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+<script>
+    // Filter Categories
+    function filterCategories() {
+        const searchInput = document.getElementById('category-search').value.toLowerCase();
+        const rows = document.querySelectorAll('#category-table tr[data-name]');
+
+        rows.forEach(row => {
+            const name = row.getAttribute('data-name');
+            row.style.display = name.includes(searchInput) ? '' : 'none';
+        });
     }
-</table>
+
+    // Table Sorting
+    function sortTable(columnIndex) {
+        const table = document.getElementById('category-table');
+        const rows = Array.from(table.querySelectorAll('tr[data-name]'));
+        const isAscending = table.dataset.sortOrder !== 'asc';
+        table.dataset.sortOrder = isAscending ? 'asc' : 'desc';
+
+        // Update sort icons
+        document.querySelectorAll('.sort-icon').forEach(icon => icon.textContent = '↕');
+        document.querySelectorAll('th')[columnIndex].querySelector('.sort-icon').textContent = isAscending ? '↑' : '↓';
+
+        rows.sort((a, b) => {
+            const aValue = a.cells[columnIndex].textContent.trim();
+            const bValue = b.cells[columnIndex].textContent.trim();
+            if (columnIndex === 0) { // ID column (numeric)
+                return isAscending ? aValue - bValue : bValue - aValue;
+            } else { // Name column (string)
+                return isAscending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+            }
+        });
+
+        // Re-append sorted rows
+        rows.forEach(row => table.appendChild(row));
+    }
+</script>

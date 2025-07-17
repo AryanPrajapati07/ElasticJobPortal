@@ -1,0 +1,37 @@
+﻿@model ElasticJobPortal.Models.QuizQuestion
+
+@{
+    ViewData["Title"] = "Edit Question";
+}
+
+<h2>Edit Question</h2>
+
+<form asp-action="EditQuestion" method="post">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="CategoryId" />
+
+    <div class="mb-3">
+        <label asp-for="QuestionText" class="form-label">Question Text</label>
+        <input asp-for="QuestionText" class="form-control" />
+        <span asp-validation-for="QuestionText" class="text-danger"></span>
+    </div>
+
+    <h4>Answers</h4>
+    <div class="row">
+        @for (int i = 0; i < Model.Answers.Count; i++)
+        {
+            <div class="col-md-6 mb-2">
+                <label>Answer @((char)('A' + i))</label>
+                <input asp-for="Answers[@i].AnswerText" class="form-control mb-1" />
+                <div class="form-check">
+                    <input class="form-check-input" asp-for="Answers[@i].IsCorrect" />
+                    <label class="form-check-label">Is Correct</label>
+                </div>
+                <input type="hidden" asp-for="Answers[@i].Id" />
+                <input type="hidden" asp-for="Answers[@i].QuestionId" />
+            </div>
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>
