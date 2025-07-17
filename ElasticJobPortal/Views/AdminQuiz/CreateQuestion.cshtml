@@ -1,0 +1,26 @@
+﻿@model ElasticJobPortal.Models.QuizQuestion
+
+<form asp-action="CreateQuestion" method="post">
+    <input type="hidden" asp-for="CategoryId" />
+
+    <div class="mb-3">
+        <label>Question:</label>
+        <input asp-for="QuestionText" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Answers:</label>
+        @for (int i = 0; i < Model.Answers.Count; i++)
+        {
+            <div class="input-group mb-2">
+                <input asp-for="Answers[@i].AnswerText" class="form-control" placeholder="Answer Text" />
+                <span class="input-group-text">
+                    <input asp-for="Answers[@i].IsCorrect" type="checkbox" />
+                    Correct
+                </span>
+            </div>
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Question</button>
+</form>

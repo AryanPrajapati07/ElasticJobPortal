@@ -32,7 +32,7 @@ namespace ElasticJobPortal.Controllers
             var questions = await _context.QuizQuestions
                 .Where(q => q.CategoryId == categoryId)
                 .Include(q => q.Answers)
-                .Take(5) // 5 questions per quiz
+                .Take(25) // 5 questions per quiz
                 .ToListAsync();
 
             ViewBag.CategoryId = categoryId;
@@ -66,6 +66,7 @@ namespace ElasticJobPortal.Controllers
             _context.QuizResults.Add(result);
             await _context.SaveChangesAsync();
 
+
             return RedirectToAction("Result", new { id = result.Id});
 
         }
@@ -78,6 +79,9 @@ namespace ElasticJobPortal.Controllers
             if (result == null) return NotFound();
             return View(result);
         }
+
+        
+
 
     }
 }

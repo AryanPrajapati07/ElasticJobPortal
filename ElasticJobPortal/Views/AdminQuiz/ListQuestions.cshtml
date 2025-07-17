@@ -1,0 +1,70 @@
+﻿@model List<ElasticJobPortal.Models.QuizQuestion>
+
+@{
+    ViewData["Title"] = "Questions by Category";
+    var categories = ViewBag.Categories as List<ElasticJobPortal.Models.QuizCategory>;
+    var selectedCategoryId = Context.Request.Query["categoryId"].ToString();
+}
+
+<h2>Quiz Questions</h2>
+
+<form method="get" asp-action="ListQuestions" class="mb-3">
+    <div class="row g-2 align-items-center">
+        <div class="col-auto">
+            <label for="categoryId" class="form-label">Select Category:</label>
+        </div>
+        <div class="col-auto">
+            <select id="categoryId" name="categoryId" class="form-select">
+                <option value="">-- All Categories --</option>
+                @foreach (var cat in categories)
+                {
+                    var isSelected = selectedCategoryId == cat.Id.ToString();
+                    <option value="@cat.Id" selected="@(isSelected ? "selected" : null)">
+                        @cat.Name
+                    </option>
+                }
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+    </div>
+</form>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No questions found for this category.</div>
+}
+else
+{
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Question</th>
+                <th>Category</th>
+                <th>Answers</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                <tr>
+                    <td>@(i + 1)</td>
+                    <td>@Model[i].QuestionText</td>
+                    <td>@Model[i].Category?.Name</td>
+                    <td>
+                        <ul>
+                            @foreach (var ans in Model[i].Answers)
+                            {
+                                <li>
+                                    @ans.AnswerText @(ans.IsCorrect ? "✅" : "")
+                                </li>
+                            }
+                        </ul>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

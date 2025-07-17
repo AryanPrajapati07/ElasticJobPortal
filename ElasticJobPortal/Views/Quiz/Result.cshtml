@@ -7,7 +7,7 @@
         <!-- Category and Date -->
         <div class="mb-4">
             <p class="text-lg font-semibold text-gray-700">Category: <span class="text-blue-600">@Model.Category.Name</span></p>
-            <p class="text-sm text-gray-500">Taken On: @Model.TakenOn.ToString("MMMM dd, yyyy h:mm tt")</p>
+            <p class="text-sm text-gray-500">Taken On: @DateTime.Now.ToString("MMMM dd,yyyy hh:mm tt")</p>
         </div>
 
         <!-- Score Display -->

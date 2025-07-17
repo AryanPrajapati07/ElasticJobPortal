@@ -7,7 +7,7 @@
         public int CategoryId { get; set; }
         public QuizCategory Category { get; set; }
 
-        public ICollection<QuizAnswer> Answers { get; set; }
+        public List<QuizAnswer> Answers { get; set; }
     }
 
 }

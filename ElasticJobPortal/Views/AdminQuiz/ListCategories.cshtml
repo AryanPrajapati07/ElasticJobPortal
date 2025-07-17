@@ -1,0 +1,15 @@
+﻿@model List<ElasticJobPortal.Models.QuizCategory>
+<h2>Categories</h2>
+<a href="/AdminQuiz/CreateCategory" class="btn btn-success mb-2">+ Add New</a>
+<table class="table">
+    <tr><th>Name</th><th>Description</th><th>Action</th></tr>
+    @foreach (var cat in Model)
+    {
+        <tr>
+            <td>@cat.Id</td>
+            <td>@cat.Name</td>
+            <td><a href="/AdminQuiz/CreateQuestion?categoryId=@cat.Id" class="btn btn-sm btn-info">Add Question</a></td>
+            <td><a href="/AdminQuiz/ListQuestions?categoryId=@cat.Id" class="btn btn-sm btn-info">View Question</a></td>
+        </tr>
+    }
+</table>
