@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 
 
@@ -80,8 +81,45 @@ namespace ElasticJobPortal.Controllers
             return View(result);
         }
 
-        
+        public IActionResult DownloadCertificate(int quizId)
+        {
+            var model = new CertificateViewModel
+            {
+                Fullname = User.Identity.Name,
+                QuizTitle = "Quiz Title", // You can fetch the actual title from the database if needed
+                Score = "Score", // Fetch the score from the database
+                CompletionDate = DateTime.UtcNow
+            };
+            ReportDocument report = new ReportDocument();
+            report.Load(Path.Combine(Directory.GetCurrentDirectory(), "Reports", "CertificateReport.rpt"));
+            report.SetDatasource(new List<CertificateViewModel> { model });
+            Stream stream = report.ExportToStream("PortableDocFormat"); 
+            stream.Seek(0,SeekOrigin.Begin);
+            return File(stream,"application/pdf","QuizCertificate.pdf");
 
+        }
+    }
 
+    internal class ReportDocument
+    {
+        public ReportDocument()
+        {
+        }
+
+        internal Stream ExportToStream(object portableDocFormat)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void Load(string v)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void SetDatasource(List<CertificateViewModel> certificateViewModels)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
+
