@@ -53,17 +53,34 @@
                class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
                role="button" aria-label="Try @Model.Category.Name Quiz Again">
                 Try Again
-            </a>
+            </a>    
             <a href="@Url.Action("Index", "Quiz")"
                class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-gray-500"
                role="button" aria-label="Return to Quiz Categories">
                 Back to Categories
             </a>
-            <a href="@Url.Action("DownloadCertificate", "Quiz")"
-               class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
-               role="button" aria-label="Return to Quiz Categories">
-                Download Certificate
-            </a>
+            @if (percentage >= 75)
+            {
+                <a asp-action="DownloadCertificate"
+                   asp-route-name="@User.Identity.Name"
+                   asp-route-quizTitle="@Model.Category.Name"
+                   asp-route-score="@Model.Score"
+                   asp-route-totalQuestions="@Model.TotalQuestions"
+                   class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500">
+                    Download Certificate
+                </a>
+            }
+            else
+            {
+                <span title="Score 75% or above to download certificate">
+                    <button class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg cursor-not-allowed" disabled>
+                        Download Certificate
+                    </button>
+                </span>
+
+            }
+
+
         </div>
     </div>
 </section>
