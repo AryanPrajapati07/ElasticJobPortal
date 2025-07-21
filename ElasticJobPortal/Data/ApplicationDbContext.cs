@@ -19,6 +19,7 @@ namespace ElasticJobPortal.Services
         public DbSet<QuizQuestion> QuizQuestions { get; set; }
         public DbSet<QuizAnswer> QuizAnswers { get; set; }
         public DbSet<QuizResult> QuizResults { get; set; }
+        public DbSet<CertificateVerification> CertificateVerifications { get; set; }
 
 
 

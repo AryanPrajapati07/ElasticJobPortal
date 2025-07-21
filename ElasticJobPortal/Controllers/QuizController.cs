@@ -87,9 +87,47 @@ namespace ElasticJobPortal.Controllers
             return View(result);
         }
 
-
-        public IActionResult DownloadCertificate(string name, string quizTitle, int score, int totalQuestions)
+        //download certificate
+        public async Task<IActionResult> DownloadCertificateAsync(string name, string quizTitle, int score, int totalQuestions)
         {
+
+            var userId = _usermanager.GetUserId(User);
+            var result = await _context.QuizResults
+                .Include(r => r.Category)
+                .FirstOrDefaultAsync(r =>
+                    r.UserId == userId &&
+                    r.Score == score &&
+                    r.TotalQuestions == totalQuestions);
+
+            if (result == null)
+                return NotFound();
+
+            // Check if a certificate already exists
+            var existing = await _context.CertificateVerifications
+                .FirstOrDefaultAsync(c => c.QuizResultId == result.Id);
+
+            string certCode;
+
+            if (existing == null)
+            {
+                certCode = Guid.NewGuid().ToString("N").Substring(0, 12).ToUpper();
+
+                _context.CertificateVerifications.Add(new CertificateVerification
+                {
+                    QuizResultId = result.Id,
+                    Code = certCode,
+                    IssuedOn = DateTime.UtcNow
+                });
+
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                certCode = existing.Code;
+            }
+
+
+
             var document = new PdfDocument();
             var page = document.AddPage();
             page.Orientation = PdfSharpCore.PageOrientation.Landscape;
@@ -127,6 +165,9 @@ namespace ElasticJobPortal.Controllers
             gfx.DrawString($"Date: {DateTime.Now:dd MMM yyyy}", bodyFont, XBrushes.Black,
                 new XRect(0, 390, width, 30), XStringFormats.TopCenter);
 
+            gfx.DrawString($"Verification Code: {certCode}", footerFont, XBrushes.Black,
+       new XRect(-40, 520, width, 30), XStringFormats.BottomRight);
+
             // Signature Line
             gfx.DrawLine(XPens.Black, width / 2 - 120, height - 150, width / 2 + 120, height - 150);
             gfx.DrawString("Authorized by: ElasticJobPortal", footerFont, XBrushes.Gray,
@@ -140,6 +181,9 @@ namespace ElasticJobPortal.Controllers
                 return File(stream.ToArray(), "application/pdf", "Certificate.pdf");
             }
         }
+
+
+
 
 
     }

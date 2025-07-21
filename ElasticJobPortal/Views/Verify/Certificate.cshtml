@@ -1,0 +1,86 @@
+﻿@model ElasticJobPortal.Models.CertificateVerification
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Verification</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .certificate-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .certificate-header {
+            color: #28a745;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .certificate-info {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+            .certificate-info p {
+                margin: 0.5rem 0;
+                font-size: 1.1rem;
+            }
+
+        .verification-code {
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: #dc3545;
+        }
+
+        .download-btn {
+            marginトップ: 1.5rem;
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+            .download-btn:hover {
+                background-color: #218838;
+                border-color: #1e7e34;
+            }
+        print {
+            .no-print
+
+        {
+            display: none;
+        }
+
+        .certificate-container {
+            border: none;
+            box-shadow: none;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container certificate-container">
+        <h2 class="text-center certificate-header mb-4">✅ Certificate Verified</h2>
+        <hr class="my-4">
+        <div class="certificate-info text-center">
+            <p><strong>Issued To:</strong> @User.Identity.Name</p>
+            <p><strong>Quiz:</strong> @Model.QuizResult.Category.Name</p>
+            <p><strong>Score:</strong> @Model.QuizResult.Score / @Model.QuizResult.TotalQuestions</p>
+            <p><strong>Issued On:</strong> @Model.IssuedOn.ToString("dd MMM yyyy")</p>
+            <p><strong>Verification Code:</strong> <span class="verification-code">@Model.Code</span></p>
+        </div>
+       
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

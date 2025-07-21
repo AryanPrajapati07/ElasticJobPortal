@@ -82,6 +82,14 @@
 
 
         </div>
+        @if (percentage >= 75)
+        {
+            <p class="text-sm text-gray-600">
+                You can verify your certificate later at: <br />
+                <code>https://yourdomain.com/verify/{generatedCode}</code>
+            </p>
+        }
+
     </div>
 </section>
 
