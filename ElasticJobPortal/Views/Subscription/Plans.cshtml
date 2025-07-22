@@ -1,0 +1,211 @@
+﻿@model List<ElasticJobPortal.Models.SubscriptionPlan>
+
+@{
+    ViewData["Title"] = "Subscription Plans";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Choose from a variety of subscription plans tailored to your needs.">
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <style>
+        .card-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+            background: linear-gradient(145deg, #ffffff, #f0f4f8);
+        }
+
+            .card-container:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            }
+
+        .card-header {
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            padding: 1.5rem;
+        }
+
+        .card-body {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.75rem;
+        }
+
+        .plan-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a3c34;
+            margin-bottom: 1rem;
+        }
+
+        .plan-duration {
+            font-size: 1.1rem;
+            color: #4b5563;
+            margin-bottom: 1rem;
+        }
+
+        .plan-features {
+            flex-grow: 1;
+            min-height: 120px;
+            color: #374151;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+            .plan-features ul {
+                list-style-type: disc;
+                padding-left: 1.5rem;
+                margin-bottom: 0;
+            }
+
+            .plan-features li {
+                margin-bottom: 0.5rem;
+            }
+
+        .btn-buy {
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            background-color: #28a745;
+            border: none;
+            font-weight: 600;
+        }
+
+            .btn-buy:hover {
+                background-color: #218838;
+                transform: scale(1.05);
+            }
+
+        .no-plans {
+            text-align: center;
+            padding: 2rem;
+            background: #f8d7da;
+            border-radius: 8px;
+            color: #721c24;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+        spin {
+            0%
+
+        {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+
+        }
+        (max-width: 576px) {
+            .card-container
+
+        {
+            margin-bottom: 2rem;
+        }
+
+        .plan-price {
+            font-size: 1.5rem;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-6">
+        <h2 class="text-center mb-6 text-4xl font-extrabold text-gray-800 animate__animated animate__fadeIn">Choose Your Plan</h2>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="no-plans animate__animated animate__fadeIn">
+                <p>No subscription plans available at the moment. Please check back later.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4" id="plans-container">
+                @foreach (var plan in Model)
+                {
+                    <div class="col-12 col-sm-6 col-lg-4 animate__animated animate__fadeInUp">
+                        <div class="card card-container border-0">
+                            <div class="card-header text-white text-center">
+                                <h4 class="mb-0 font-semibold text-lg">@plan.Name</h4>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="plan-price">₹@plan.Price</h5>
+                                <p class="plan-duration">Duration: @plan.Duration</p>
+                                <div class="plan-features">
+                                    <ul>
+                                        @{
+                                            var features = plan.Features?.Split(new[] { '-', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                            .Select(f => f.Trim())
+                                            .Where(f => !string.IsNullOrEmpty(f));
+                                            foreach (var feature in features ?? Enumerable.Empty<string>())
+                                            {
+                                                <li>@feature</li>
+                                            }
+                                        }
+                                    </ul>
+                                </div>
+                                <form method="post" asp-action="Buy" asp-controller="Subscription" class="mt-4">
+                                    <input type="hidden" name="planId" value="@plan.Id" />
+                                    <button type="submit" class="btn btn-buy w-100 py-2">Buy Now</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="loading-spinner d-none" id="loading-spinner"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const plansContainer = document.getElementById('plans-container');
+            const loadingSpinner = document.getElementById('loading-spinner');
+
+            // Simulate loading state (can be integrated with actual async data fetch)
+            if (plansContainer) {
+                plansContainer.classList.add('d-none');
+                loadingSpinner.classList.remove('d-none');
+                setTimeout(() => {
+                    plansContainer.classList.remove('d-none');
+                    loadingSpinner.classList.add('d-none');
+                }, 1000); // Simulate 1s loading
+            }
+
+            // Form submission handling with basic validation
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', (e) => {
+                    const planId = form.querySelector('input[name="planId"]').value;
+                    if (!planId) {
+                        e.preventDefault();
+                        alert('Invalid plan selected. Please try again.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

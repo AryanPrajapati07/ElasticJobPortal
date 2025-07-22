@@ -2,7 +2,9 @@
 using ElasticJobPortal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace ElasticJobPortal.Controllers
 {
@@ -196,13 +198,42 @@ namespace ElasticJobPortal.Controllers
                 .Include(q => q.Answers)
                 .FirstOrDefaultAsync(q => q.Id == id);
             if (question != null)
-            { 
+            {
                 _context.QuizQuestions.Remove(question);
                 _context.QuizAnswers.RemoveRange(question.Answers);
                 await _context.SaveChangesAsync();
             }
-               
+
             return RedirectToAction("ListQuestions");
+
+        }
+
+
+        //All Results
+        public async Task<IActionResult> AllResults(string search, int? categoryId)
+        {
+
+            var query = _context.QuizResults
+                .Include(r => r.Category)
+                .Include(r => r.User)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(r =>
+                    r.User.UserName.Contains(search) ||
+                    r.Category.Name.Contains(search));
+            }
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(r => r.CategoryId == categoryId);
+            }
+
+            var categories = await _context.QuizCategories.ToListAsync();
+            ViewBag.Categories = new SelectList(categories, "Id", "Name");
+
+            return View(await query.OrderByDescending(r => r.TakenOn).ToListAsync());
 
         }
 

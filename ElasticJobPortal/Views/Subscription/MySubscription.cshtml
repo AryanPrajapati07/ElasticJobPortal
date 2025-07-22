@@ -1,0 +1,23 @@
+﻿@model ElasticJobPortal.Models.JobSeekerSubscription
+
+@{
+    ViewData["Title"] = "My Subscription";
+}
+
+<h2>My Active Subscription</h2>
+
+@if (Model == null)
+{
+    <div class="alert alert-info">You have no active subscription.</div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <h4>@Model.Plan.Name</h4>
+            <p> Started: @Model.SubscribedOn.ToString("dd MMM yyyy")</p>
+            <p> Expires: @(Model.ExpiryDate?.ToString("dd MMM yyyy") ?? "Never (Lifetime)")</p>
+            <p>Features: @Model.Plan.Features</p>
+        </div>
+    </div>
+}

@@ -148,7 +148,9 @@
 
 <div class="profile-container mt-0">
     <h2 class="mb-3 text-center">My Profile</h2>
-
+    <div class="nav-item">
+        <a class="nav-link" asp-controller="Subscription" asp-action="MySubscription">My Subscription</a>
+    </div>
     <!-- Success Message -->
     @if (TempData["Success"] != null)
     {
