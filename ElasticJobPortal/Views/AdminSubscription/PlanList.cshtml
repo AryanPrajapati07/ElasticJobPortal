@@ -1,0 +1,192 @@
+﻿@model IEnumerable<ElasticJobPortal.Models.SubscriptionPlan>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Manage subscription plans for Elastic Job Portal.">
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <style>
+        .table-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: linear-gradient(145deg, #ffffff, #f0f4f8);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+            .table-container:hover {
+                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            }
+
+        .table {
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+            .table thead {
+                background: linear-gradient(90deg, #007bff, #0056b3);
+                color: #fff;
+            }
+
+            .table th, .table td {
+                padding: 1rem;
+                vertical-align: middle;
+                font-size: 0.95rem;
+            }
+
+        .features-list {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin: 0;
+        }
+
+            .features-list li {
+                margin-bottom: 0.5rem;
+            }
+
+        .btn-action {
+            transition: transform 0.2s ease, background-color 0.3s ease;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+        }
+
+            .btn-action:hover {
+                transform: scale(1.05);
+            }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+
+            .btn-primary:hover {
+                background-color: #0056b3;
+            }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+        }
+
+            .btn-danger:hover {
+                background-color: #b02a37;
+            }
+
+        .nav-link {
+            display: inline-block;
+            color: #007bff;
+            font-weight: 600;
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+            .nav-link:hover {
+                color: #0056b3;
+                text-decoration: underline;
+            }
+
+        .no-plans {
+            text-align: center;
+            padding: 2rem;
+            background: #f8d7da;
+            border-radius: 8px;
+            color: #721c24;
+            font-size: 1.1rem;
+        }
+
+       
+
+        (max-width: 768px) {
+            .table-container
+
+        {
+            padding: 1.5rem;
+        }
+
+        .table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+            .table th, .table td {
+                font-size: 0.9rem;
+                padding: 0.75rem;
+            }
+
+        .btn-action {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container table-container animate__animated animate__fadeIn">
+        <h2 class="text-center mb-5 text-3xl font-extrabold text-gray-800">Subscription Plans</h2>
+        
+            <a asp-action="Create" asp-controller="AdminSubscription" class="btn btn-close-white btn-primary btn-action me-2">+Add New Plan</a>
+       
+        @if (Model == null || !Model.Any())
+        {
+            <div class="no-plans animate__animated animate__fadeIn">
+                <p>No subscription plans available. Add a new plan to get started.</p>
+            </div>
+        }
+        else
+        {
+            <table class="table table-bordered mt-3">
+                <thead>
+                    <tr>
+                        <th scope="col">Plan</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Duration</th>
+                        <th scope="col">Features</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var plan in Model)
+                    {
+                        <tr class="animate__animated animate__fadeInUp">
+                            <td>@plan.Name</td>
+                            <td>₹@plan.Price</td>
+                            <td>@plan.Duration</td>
+                            <td>
+                                <ul class="features-list">
+                                    @{
+                                        var features = plan.Features?.Split(new[] { '-', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(f => f.Trim())
+                                        .Where(f => !string.IsNullOrEmpty(f));
+                                        foreach (var feature in features ?? Enumerable.Empty<string>())
+                                        {
+                                            <li>@feature</li>
+                                        }
+                                    }
+                                </ul>
+                            </td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@plan.Id" class="btn btn-sm btn-primary btn-action me-2">Edit</a>
+                                <a asp-action="Delete" asp-route-id="@plan.Id" class="btn btn-sm btn-danger btn-action">Delete</a>
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -2,6 +2,7 @@
 using ElasticJobPortal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ElasticJobPortal.Controllers
 {
@@ -13,13 +14,15 @@ namespace ElasticJobPortal.Controllers
         {
             _context = context;
         }
-       
-        public IActionResult PlanList()
+
+        //show all subscription plans
+        public async Task<IActionResult> PlanList()
         {
-            var plans = _context.SubscriptionPlans.ToList();
+            var plans = await _context.SubscriptionPlans.ToListAsync();
             return View(plans);
         }
 
+        //create a new subscription plan
         public IActionResult Create()
         {
             return View();
@@ -33,6 +36,47 @@ namespace ElasticJobPortal.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("Create");
         }
+
+        //edit a subscription plan
+        public async Task<IActionResult> Edit(int id)
+        {
+            var plan = await _context.SubscriptionPlans.FindAsync(id);
+            if (plan == null) return NotFound();
+            return View(plan);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Edit(SubscriptionPlan plan)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.SubscriptionPlans.Update(plan);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("PlanList");
+            }
+            return View(plan);
+        }
+
+        //delete a subscription plan
+        public async Task<IActionResult> Delete(int id)
+        {
+            var plan = await _context.SubscriptionPlans.FindAsync(id);
+            if (plan == null) return NotFound();
+            return View(plan);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var plan = await _context.SubscriptionPlans.FindAsync(id);
+            if (plan != null)
+            {
+                _context.SubscriptionPlans.Remove(plan);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("PlanList");
+        }
+
 
     }
 }
