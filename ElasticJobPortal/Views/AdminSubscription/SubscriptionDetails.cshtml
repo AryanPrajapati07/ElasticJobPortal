@@ -1,0 +1,39 @@
+﻿@model IEnumerable<ElasticJobPortal.Models.JobSeekerSubscription>
+
+@{
+    ViewData["Title"] = "My Payments";
+}
+
+<div class="container mt-1">
+    <h2 class="text-2xl font-bold mb-4">My Payments</h2>
+
+    @if (!Model.Any())
+    {
+        <p>No payments found.</p>
+    }
+    else
+    {
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>User ID</th>
+                    <th>Plan</th>
+                    <th>Start Date</th>
+                    <th>Expiry Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var subscription in Model)
+                {
+                    <tr>
+                        <td>@subscription.UserId</td>
+                        <td>@subscription.PlanId</td>
+                        <td>@subscription.SubscribedOn.ToLocalTime().ToString("dd MMM yyyy")</td>
+
+                        <td>@subscription.ExpiryDate</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

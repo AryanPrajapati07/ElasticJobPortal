@@ -3,6 +3,7 @@ using ElasticJobPortal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Numerics;
 
 namespace ElasticJobPortal.Controllers
 {
@@ -75,6 +76,22 @@ namespace ElasticJobPortal.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction("PlanList");
+        }
+
+        [HttpGet]
+        public IActionResult SubscriptionDetails()
+        {
+            var details = _context.JobSeekerSubscriptions.ToList();
+            if (details == null) return NotFound();
+            return View(details);
+        }
+
+        [HttpGet]
+        public IActionResult PaymentDetails()
+        {
+            var pays = _context.PaymentDetails.ToList();
+            if (pays == null) return NotFound();
+            return View(pays);
         }
 
 

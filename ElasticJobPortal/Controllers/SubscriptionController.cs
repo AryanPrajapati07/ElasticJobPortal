@@ -67,7 +67,17 @@ namespace ElasticJobPortal.Controllers
             ViewBag.Price = Convert.ToDecimal(plan.Price);
             ViewBag.Duration = plan.Duration;
 
-            return View(); // Buy.cshtml
+            var userId = _userManager.GetUserId(User);
+            var existingSubscription = await _context.JobSeekerSubscriptions
+                .FirstOrDefaultAsync(s => s.UserId == userId && (s.ExpiryDate == null || s.ExpiryDate > DateTime.UtcNow));
+            if (existingSubscription != null)
+            {
+                TempData["ErrorMessage"] = "You already have an active subscription.";
+                return RedirectToAction("MySubscription");
+            }
+
+
+                return View(); // Buy.cshtml
         }
 
         public async Task<IActionResult> MyPayments()

@@ -66,6 +66,19 @@ namespace ElasticJobPortal.Controllers
 
             _context.PaymentDetails.Add(payment);
             await _context.SaveChangesAsync();
+
+            var subscription = new JobSeekerSubscription
+            {
+                UserId = userId,
+                PlanId = _context.SubscriptionPlans
+                        .Where(p=>p.Name == paymentData.PlanName)
+                        .Select(p => p.Id)
+                        .FirstOrDefault(),
+                SubscribedOn = DateTime.UtcNow,
+                ExpiryDate = paymentData.PlanName.ToLower() == "lifetime" ? (DateTime?)null : DateTime.UtcNow.AddMonths(1)
+            };
+            _context.JobSeekerSubscriptions.Add(subscription);
+            await _context.SaveChangesAsync();
             return Ok(new { message = "Payment successful" });
         }
 
