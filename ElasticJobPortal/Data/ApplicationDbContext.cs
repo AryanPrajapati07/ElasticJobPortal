@@ -22,6 +22,8 @@ namespace ElasticJobPortal.Services
         public DbSet<CertificateVerification> CertificateVerifications { get; set; }
         public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
         public DbSet<JobSeekerSubscription> JobSeekerSubscriptions { get; set; }
+        public DbSet<PaymentDetail> PaymentDetails { get; set; }
+
 
 
 

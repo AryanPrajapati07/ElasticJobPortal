@@ -58,7 +58,7 @@
                             <span class="spinner-border spinner-border-sm d-none" id="loading-spinner"></span>
                             <span id="button-text">
                                 <i class="fas fa-lock me-2"></i>
-                                Secure Payment - ₹@price
+                                Secure Payment for @planName - ₹@price
                             </span>
                         </button>
                         <small class="text-muted text-center mt-2">
@@ -92,8 +92,8 @@
                 <h4 class="text-success mb-3">Payment Successful!</h4>
                 <p class="mb-4">Your subscription to <strong>@planName</strong> has been activated.</p>
                 <p class="text-muted small mb-4">Payment ID: <span id="payment-id"></span></p>
-                <button type="button" class="btn btn-primary" onclick="window.location.href='/Dashboard'">
-                    Go to Dashboard
+                <button type="button" class="btn btn-primary" onclick="window.location.href='/Profile/Index'">
+                    Go to Profile
                 </button>
             </div>
         </div>
@@ -226,25 +226,24 @@
 
         async function verifyPayment(paymentResponse) {
             try {
-                const response = await fetch("/Payment/VerifyPayment", {
+                const response = await fetch("/Payment/PaymentSuccess", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                        // "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]')?.value
                     },
                     body: JSON.stringify({
+                        planId: @planId,
                         razorpay_order_id: paymentResponse.razorpay_order_id,
                         razorpay_payment_id: paymentResponse.razorpay_payment_id,
                         razorpay_signature: paymentResponse.razorpay_signature,
-                        planId: "@planId"
+                        planName:"@planName",
+                        amount: @price
                     })
                 });
-
-                if (response.ok) {
-                    console.log("Payment verified successfully");
-                } else {
-                    console.warn("Payment verification failed");
-                }
+                const result = await response.json();
+                alert(result.message);
+                window.location.href = "/Subscription/MyPayments";
             } catch (error) {
                 console.error("Error verifying payment:", error);
             }

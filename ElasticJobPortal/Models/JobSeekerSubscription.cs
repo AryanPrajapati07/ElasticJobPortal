@@ -7,6 +7,7 @@
         public ApplicationUser User { get; set; }
 
         public int PlanId { get; set; }
+
         public SubscriptionPlan Plan { get; set; }
 
         public DateTime SubscribedOn { get; set; }

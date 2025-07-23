@@ -4,18 +4,24 @@ using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Identity;
+using ElasticJobPortal.Services;
 
 namespace ElasticJobPortal.Controllers
 {
     public class PaymentController : Controller
     {
         private readonly IConfiguration _config;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ApplicationDbContext _context;
         private readonly string key = "rzp_test_kLX7L8BYDbH8a2";
         private readonly string secret = "bqFMooSdJGjmiE7JagpU9YZS";
 
-        public PaymentController(IConfiguration config)
+        public PaymentController(IConfiguration config,UserManager<ApplicationUser> userManager,ApplicationDbContext context)
         {
             _config = config;
+            _userManager = userManager;
+            _context = context;
         }
 
         [HttpPost]
@@ -40,11 +46,50 @@ namespace ElasticJobPortal.Controllers
             return Content(jsonResponse,"application/json");
         }
 
+        //payment success
+        [HttpPost]
+        public async Task<IActionResult> PaymentSuccess([FromBody] RazorpayPaymentSuccessDto paymentData)
+        {
+            var userId = _userManager.GetUserId(User);
+            var payment = new PaymentDetail
+            {
+                UserId = userId,
+                PlanId = paymentData.PlanId,
+                RazorpayOrderId = paymentData.razorpay_order_id,
+                RazorpayPaymentId = paymentData.razorpay_payment_id,
+                RazorpaySignature = paymentData.razorpay_signature,
+                Amount = paymentData.Amount,
+                PlanName = paymentData.PlanName,
+                PaymentDate = DateTime.UtcNow,
+                Status = "Success"
+            };
+
+            _context.PaymentDetails.Add(payment);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Payment successful" });
+        }
+
+        public class RazorpayPaymentSuccessDto
+        {
+            public int PlanId { get; set; }
+            public string razorpay_payment_id { get; set; }
+            public string razorpay_order_id { get; set; }
+            public string razorpay_signature { get; set; }
+            public decimal Amount { get; set; }
+            public string PlanName { get; set; }
+        }
         public class RazorpayOrderRequest
         {
             public decimal amount { get; set; }
             public string planName { get; set; }
 
         }
+
+
+
+
+
     }
+
+    
 }

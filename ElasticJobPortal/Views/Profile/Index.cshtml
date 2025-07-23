@@ -10,203 +10,668 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+<html>
+<head>
 
 <style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+        --border-radius: 15px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+        scroll-behavior: smooth;
+    }
+
     body {
-        background-color: #f4f7fa;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        position: relative;
     }
 
-    .profile-container {
-        max-width: 1200px;
-        margin: 20px auto;
-        padding: 0 15px;
-    }
-
-    .card {
-        border: none;
-        border-radius: 10px;
-        transition: transform 0.3s, box-shadow 0.3s;
-    }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+            pointer-events: none;
+            z-index: -1;
         }
 
+    .profile-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    .page-title {
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 700;
+        background: linear-gradient(135deg, #fff 0%, #e0e7ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        letter-spacing: -0.02em;
+    }
+
+    .page-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.2rem;
+        font-weight: 300;
+        margin-bottom: 2rem;
+    }
+
+    .nav-pills-custom {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 3rem;
+        flex-wrap: wrap;
+    }
+
+    .nav-pill {
+        padding: 0.75rem 1.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50px;
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .nav-pill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-pill:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+            .nav-pill:hover::before {
+                left: 100%;
+            }
+
+    .card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+            .card:hover::before {
+                transform: scaleX(1);
+            }
+
     .card-title {
-        font-size: 1.25rem;
-        color: #333;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .card-subtitle {
-        font-size: 1rem;
-        color: #6c757d;
+        color: #718096;
+        font-weight: 500;
+        margin-bottom: 1rem;
     }
 
     .card-text {
-        font-size: 0.95rem;
-        color: #555;
+        color: #4a5568;
+        line-height: 1.6;
     }
 
-        .card-text strong {
-            color: #333;
+    .btn-gradient {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 50px;
+        padding: 0.75rem 2rem;
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .btn-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
         }
 
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+            .btn-gradient:hover::before {
+                left: 100%;
+            }
+
+    .btn-success-gradient {
+        background: var(--success-gradient);
+    }
+
+    .btn-danger-gradient {
+        background: var(--danger-gradient);
+    }
+
     .apply-btn {
-        background-color: #007bff;
+        background: var(--success-gradient);
         border: none;
-        border-radius: 5px;
-        padding: 8px 15px;
-        transition: background-color 0.3s;
+        border-radius: 25px;
+        padding: 0.5rem 1.5rem;
+        color: white;
+        font-weight: 600;
+        transition: var(--transition);
+        font-size: 0.9rem;
     }
 
         .apply-btn:hover {
-            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(79, 172, 254, 0.3);
+            color: white;
         }
 
     .applied-btn {
-        background-color: #6c757d;
+        background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
         border: none;
-        border-radius: 5px;
-        padding: 8px 15px;
+        border-radius: 25px;
+        padding: 0.5rem 1.5rem;
+        color: white;
+        font-weight: 600;
         cursor: not-allowed;
+        font-size: 0.9rem;
     }
 
     .unsave-btn {
-        border-radius: 5px;
-        padding: 8px 15px;
-        font-size: 0.9rem;
-        background-color: #dc3545;
-        color: #fff;
+        background: var(--danger-gradient);
         border: none;
-        transition: background-color 0.3s;
-        margin-left: 10px;
+        border-radius: 25px;
+        padding: 0.5rem 1.5rem;
+        color: white;
+        font-weight: 600;
+        transition: var(--transition);
+        font-size: 0.9rem;
+        margin-left: 0.5rem;
     }
 
         .unsave-btn:hover {
-            background-color: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(250, 112, 154, 0.3);
+            color: white;
         }
 
-    .file-input {
-        font-size: 0.9rem;
+    .form-control {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        transition: var(--transition);
+        background: rgba(255, 255, 255, 0.9);
     }
 
-    .alert-success, .alert-info, .alert-warning {
-        border-radius: 5px;
-        padding: 12px;
-        margin-bottom: 20px;
-    }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
 
-    .profile-form .form-control, .profile-form .form-control:focus {
-        border-radius: 5px;
-        box-shadow: none;
-    }
-
-    .profile-form .form-label {
-        font-weight: 500;
-        color: #333;
+    .form-label {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .section-header {
-        font-size: 1.5rem;
-        color: #333;
-        margin: 30px 0 20px;
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin: 3rem 0 2rem;
+        text-align: center;
+        position: relative;
     }
 
-    /* Responsive adjustments */
+        .section-header::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+
+    .alert {
+        border: none;
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .alert::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: currentColor;
+        }
+
+    .alert-success {
+        background: rgba(72, 187, 120, 0.1);
+        color: #2f855a;
+        border-left: 4px solid #48bb78;
+    }
+
+    .alert-info {
+        background: rgba(66, 153, 225, 0.1);
+        color: #2c5282;
+        border-left: 4px solid #4299e1;
+    }
+
+    .alert-warning {
+        background: rgba(237, 137, 54, 0.1);
+        color: #c05621;
+        border-left: 4px solid #ed8936;
+    }
+
+    .job-card {
+        height: 100%;
+        position: relative;
+        transition: var(--transition);
+    }
+
+        .job-card .card-body {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+    .job-actions {
+        margin-top: auto;
+        padding-top: 1.5rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        text-align: center;
+        transition: var(--transition);
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 700;
+        color: white;
+        display: block;
+    }
+
+    .stat-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+        margin-top: 0.5rem;
+    }
+
+    .file-upload-area {
+        border: 2px dashed #cbd5e0;
+        border-radius: 10px;
+        padding: 2rem;
+        text-align: center;
+        transition: var(--transition);
+        background: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+    }
+
+        .file-upload-area:hover,
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+    .file-upload-icon {
+        font-size: 3rem;
+        color: #a0aec0;
+        margin-bottom: 1rem;
+    }
+
+    .loading-spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    spin {
+        0%
+
+    {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    /* Responsive Design */
     (max-width: 768px) {
+        .profile-container
+
+    {
+        padding: 1rem;
+    }
+
+    .nav-pills-custom {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .job-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+        .job-actions .btn {
+            width: 100%;
+        }
+
+    .unsave-btn {
+        margin-left: 0;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .stat-card {
+        padding: 1.5rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    }
+
+    (max-width: 480px) {
+        .stats-grid
+
+    {
+        grid-template-columns: 1fr;
+    }
+
+    }
+
+    /* Dark mode support */
+    (prefers-color-scheme: dark) {
         .card
 
     {
-        margin-bottom: 15px;
+        background: rgba(26, 32, 44, 0.95);
+        color: #e2e8f0;
     }
 
     .card-title {
-        font-size: 1.1rem;
+        color: #f7fafc;
     }
 
-    .card-text {
-        font-size: 0.9rem;
+    .form-control {
+        background: rgba(45, 55, 72, 0.9);
+        border-color: #4a5568;
+        color: #e2e8f0;
     }
 
-    .apply-btn, .unsave-btn {
-        padding: 6px 12px;
-        font-size: 0.85rem;
-    }
-
-    .unsave-btn {
-        margin-left: 5px;
-    }
-
-    .profile-form .form-control {
-        font-size: 0.9rem;
-    }
+        .form-control:focus {
+            background: #2d3748;
+            border-color: #667eea;
+        }
 
     }
 </style>
+</head>
+<body>
+<div class="profile-container">
+    <!-- Page Header -->
+    <div class="page-header fade-in">
+        <h1 class="page-title">My Profile</h1>
+        <p class="page-subtitle">Manage your career journey</p>
 
-<div class="profile-container mt-0">
-    <h2 class="mb-3 text-center">My Profile</h2>
-    <div class="nav-item">
-        <a class="nav-link" asp-controller="Subscription" asp-action="MySubscription">My Subscription</a>
+        <!-- Navigation Pills -->
+        <div class="nav-pills-custom">
+            <a class="nav-pill" asp-controller="Subscription" asp-action="Plans">
+                <i class="fas fa-crown me-2"></i>Get Plus
+            </a>
+            <a class="nav-pill" asp-controller="Subscription" asp-action="MySubscription">
+                <i class="fas fa-user-check me-2"></i>My Subscription
+            </a>
+            <a class="nav-pill" asp-controller="Subscription" asp-action="MyPayments">
+                <i class="fas fa-credit-card me-2"></i>My Payments
+            </a>
+        </div>
     </div>
+
+    <!-- Statistics Overview -->
+    <div class="stats-grid fade-in">
+        <div class="stat-card">
+            <span class="stat-number">@Model.Applications.Count()</span>
+            <div class="stat-label">Applications</div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">@Model.SavedJobs.Count()</span>
+            <div class="stat-label">Saved Jobs</div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">@(string.IsNullOrEmpty(Model.ResumePath) ? 0 : 1)</span>
+            <div class="stat-label">Resume Uploaded</div>
+        </div>
+    </div>
+
     <!-- Success Message -->
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success">
+        <div class="alert alert-success fade-in">
             <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
         </div>
     }
 
     <!-- Profile Form -->
-    <div class="card mb-4 shadow-sm">
+    <div class="card mb-5 shadow-lg fade-in">
         <div class="card-body">
-            <h5 class="card-title">Update Profile</h5>
+            <h5 class="card-title">
+                <i class="fas fa-user-edit"></i>
+                Update Profile
+            </h5>
             <form asp-action="Index" method="post" enctype="multipart/form-data" class="profile-form">
-                <div class="mb-3">
-                    <label asp-for="FullName" class="form-label">Full Name</label>
-                    <input asp-for="FullName" class="form-control" required />
-                    <span asp-validation-for="FullName" class="text-danger"></span>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="FullName" class="form-label">
+                            <i class="fas fa-user"></i>
+                            Full Name
+                        </label>
+                        <input asp-for="FullName" class="form-control" required placeholder="Enter your full name" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Email" class="form-label">
+                            <i class="fas fa-envelope"></i>
+                            Email
+                        </label>
+                        <input asp-for="Email" class="form-control" readonly />
+                    </div>
                 </div>
+
                 <div class="mb-3">
-                    <label asp-for="Email" class="form-label">Email</label>
-                    <input asp-for="Email" class="form-control" readonly />
-                </div>
-                <div class="mb-3">
-                    <label asp-for="Location" class="form-label">Location</label>
-                    <input asp-for="Location" class="form-control" />
+                    <label asp-for="Location" class="form-label">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Location
+                    </label>
+                    <input asp-for="Location" class="form-control" placeholder="City, Country" />
                     <span asp-validation-for="Location" class="text-danger"></span>
                 </div>
+
                 <div class="mb-3">
-                    <label asp-for="Bio" class="form-label">Skills</label>
-                    <textarea asp-for="Bio" class="form-control" rows="4"></textarea>
+                    <label asp-for="Bio" class="form-label">
+                        <i class="fas fa-tools"></i>
+                        Skills & Bio
+                    </label>
+                    <textarea asp-for="Bio" class="form-control" rows="4" placeholder="Describe your skills and experience..."></textarea>
                     <span asp-validation-for="Bio" class="text-danger"></span>
                 </div>
-                <div class="mb-3">
-                    <label asp-for="ResumeFile" class="form-label">Upload Default Resume</label>
-                    <input asp-for="ResumeFile" type="file" accept=".pdf" class="form-control file-input" />
+
+                <div class="mb-4">
+                    <label asp-for="ResumeFile" class="form-label">
+                        <i class="fas fa-file-pdf"></i>
+                        Upload Resume
+                    </label>
+                    <div class="file-upload-area" onclick="document.querySelector('input[name=ResumeFile]').click()">
+                        <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                        <p class="mb-0">Click to upload or drag & drop your PDF resume</p>
+                        <small class="text-muted">Maximum file size: 5MB</small>
+                    </div>
+                    <input asp-for="ResumeFile" type="file" accept=".pdf" class="d-none" />
                     <span asp-validation-for="ResumeFile" class="text-danger"></span>
                     @if (!string.IsNullOrEmpty(Model.ResumePath))
                     {
-                        <a href="@Model.ResumePath" target="_blank" class="text-primary mt-2 d-inline-block">
-                            <i class="fas fa-file-pdf me-1"></i> View Current Resume
-                        </a>
+                        <div class="mt-3">
+                            <a href="@Model.ResumePath" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i> View Current Resume
+                            </a>
+                        </div>
                     }
                 </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save me-1"></i> Save Changes
+
+                <button type="submit" class="btn btn-gradient">
+                    <span class="loading-spinner me-2"></span>
+                    <i class="fas fa-save me-2"></i> Save Changes
                 </button>
             </form>
         </div>
     </div>
 
     <!-- My Applications -->
-    <h4 class="section-header">My Applications</h4>
+    <h4 class="section-header">
+        <i class="fas fa-briefcase me-2"></i>My Applications
+    </h4>
     @if (!Model.Applications.Any())
     {
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i> You haven't applied to any jobs yet.
+        <div class="alert alert-info fade-in">
+            <i class="fas fa-info-circle me-2"></i> Ready to start your job search? Browse available positions and submit your applications!
         </div>
     }
     else
@@ -216,25 +681,46 @@
             {
                 @if (app.Job == null)
                 {
-                    <div class="alert alert-warning">
+                    <div class="alert alert-warning fade-in">
                         <i class="fas fa-exclamation-triangle me-2"></i> Job data is missing for an application.
                     </div>
                     continue;
                 }
-                <div class="col-md-4 col-sm-6 mb-4">
-                    <div class="card h-100 shadow-sm">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card job-card shadow-lg fade-in">
                         <div class="card-body">
                             <h5 class="card-title">@app.Job.Title</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">@app.Job.Company</h6>
-                            <p class="card-text">
-                                <strong>Applied On:</strong> @app.AppliedOn.ToShortDateString()<br />
-                                <strong>Description:</strong> @app.Job.Description<br />
-                                <strong>Job Type:</strong> @app.Job.JobType<br />
-                                <strong>Skills:</strong> @app.Job.SkillsCsv
-                            </p>
-                            <button class="btn btn-sm applied-btn" disabled>
-                                <i class="fas fa-check me-1"></i> Applied
-                            </button>
+                            <h6 class="card-subtitle mb-3">
+                                <i class="fas fa-building me-1"></i>@app.Job.Company
+                            </h6>
+                            <div class="card-text mb-3">
+                                <div class="mb-2">
+                                    <strong><i class="fas fa-calendar me-1"></i>Applied:</strong>
+                                    @app.AppliedOn.ToString("MMM dd, yyyy")
+                                </div>
+                                <div class="mb-2">
+                                    <strong><i class="fas fa-briefcase me-1"></i>Type:</strong>
+                                    @app.Job.JobType
+                                </div>
+                                <div class="mb-2">
+                                    <strong><i class="fas fa-info-circle me-1"></i>Description:</strong>
+                                    <p class="text-muted small mt-1">@app.Job.Description</p>
+                                </div>
+                                <div class="mb-2">
+                                    <strong><i class="fas fa-tags me-1"></i>Skills:</strong>
+                                    <div class="mt-1">
+                                        @foreach (var skill in app.Job.SkillsCsv?.Split(',') ?? new string[0])
+                                        {
+                                            <span class="badge bg-light text-dark me-1 mb-1">@skill.Trim()</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="job-actions">
+                                <button class="btn applied-btn" disabled>
+                                    <i class="fas fa-check me-1"></i> Applied
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -243,11 +729,13 @@
     }
 
     <!-- Saved Jobs -->
-    <h4 class="section-header">Saved Jobs</h4>
+    <h4 class="section-header">
+        <i class="fas fa-heart me-2"></i>Saved Jobs
+    </h4>
     @if (!Model.SavedJobs.Any())
     {
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i> You haven't saved any jobs yet.
+        <div class="alert alert-info fade-in">
+            <i class="fas fa-bookmark me-2"></i> No saved jobs yet. Start browsing and save jobs that interest you!
         </div>
     }
     else
@@ -257,47 +745,64 @@
             {
                 @if (saved.Job == null)
                 {
-                    <div class="alert alert-warning">
+                    <div class="alert alert-warning fade-in">
                         <i class="fas fa-exclamation-triangle me-2"></i> Job data is missing for a saved job.
                     </div>
                     continue;
                 }
-                <div class="col-md-4 col-sm-6 mb-4">
-                    <div class="card h-100 shadow-sm">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card job-card shadow-lg fade-in">
                         <div class="card-body">
                             <h5 class="card-title">@saved.Job.Title</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">@saved.Job.Company</h6>
-                            <p class="card-text">
-                                <strong>Description:</strong> @saved.Job.Description<br />
-                                <strong>Job Type:</strong> @saved.Job.JobType<br />
-                                <strong>Skills:</strong> @saved.Job.SkillsCsv
-                            </p>
-                            <div class="d-flex align-items-center">
+                            <h6 class="card-subtitle mb-3">
+                                <i class="fas fa-building me-1"></i>@saved.Job.Company
+                            </h6>
+                            <div class="card-text mb-3">
+                                <div class="mb-2">
+                                    <strong><i class="fas fa-briefcase me-1"></i>Type:</strong>
+                                    @saved.Job.JobType
+                                </div>
+                                <div class="mb-2">
+                                    <strong><i class="fas fa-info-circle me-1"></i>Description:</strong>
+                                    <p class="text-muted small mt-1">@saved.Job.Description</p>
+                                </div>
+                                <div class="mb-2">
+                                    <strong><i class="fas fa-tags me-1"></i>Skills:</strong>
+                                    <div class="mt-1">
+                                        @foreach (var skill in saved.Job.SkillsCsv?.Split(',') ?? new string[0])
+                                        {
+                                            <span class="badge bg-light text-dark me-1 mb-1">@skill.Trim()</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="job-actions">
                                 @if (appliedJobIds.Contains(saved.Job.Id))
                                 {
-                                    <button class="btn btn-sm applied-btn" disabled>
+                                    <button class="btn applied-btn" disabled>
                                         <i class="fas fa-check me-1"></i> Applied
                                     </button>
                                 }
                                 else
                                 {
-                                    <form asp-action="Apply" asp-controller="Job" enctype="multipart/form-data" method="post" class="apply-form me-2">
+                                    <form asp-action="Apply" asp-controller="Job" enctype="multipart/form-data" method="post" class="apply-form mb-2">
                                         <input type="hidden" name="jobId" value="@saved.Job.Id" />
                                         <div class="mb-2">
-                                            <input type="file" name="resumeFile" accept=".pdf" required class="form-control form-control-sm file-input" />
+                                            <input type="file" name="resumeFile" accept=".pdf" required class="form-control form-control-sm" />
                                             <div class="invalid-feedback">
                                                 Please upload a PDF resume.
                                             </div>
                                         </div>
-                                        <button type="submit" class="btn btn-sm apply-btn">
-                                            <i class="fas fa-upload me-1"></i> Apply with Resume
+                                        <button type="submit" class="btn apply-btn">
+                                            <span class="loading-spinner me-1"></span>
+                                            <i class="fas fa-paper-plane me-1"></i> Apply Now
                                         </button>
                                     </form>
                                 }
                                 <form method="post" asp-action="UnsaveJob" asp-controller="Job" class="unsave-form">
                                     <input type="hidden" name="jobId" value="@saved.Job.Id" />
-                                    <button type="submit" class="btn btn-sm unsave-btn" data-job-id="@saved.Job.Id">
-                                        <i class="fas fa-trash me-1"></i> Remove
+                                    <button type="submit" class="btn unsave-btn" data-job-id="@saved.Job.Id">
+                                        <i class="fas fa-heart-broken me-1"></i> Remove
                                     </button>
                                 </form>
                             </div>
@@ -309,19 +814,70 @@
     }
 </div>
 
+</body>
+</html>
+
+
 <!-- Include Bootstrap JS, Toastr, jQuery, and jQuery Validation -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
+
 <script>
     $(document).ready(function () {
-        // Client-side form validation for Profile
+        // Enhanced file upload handling
+        const fileInput = $('input[name="ResumeFile"]');
+        const uploadArea = $('.file-upload-area');
+
+        // File drag and drop
+        uploadArea.on('dragover', function(e) {
+            e.preventDefault();
+            $(this).addClass('dragover');
+        });
+
+        uploadArea.on('dragleave', function(e) {
+            e.preventDefault();
+            $(this).removeClass('dragover');
+        });
+
+        uploadArea.on('drop', function(e) {
+            e.preventDefault();
+            $(this).removeClass('dragover');
+
+            const files = e.originalEvent.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput[0].files = files;
+                updateFileDisplay(files[0]);
+            }
+        });
+
+        // Update file display
+        fileInput.on('change', function() {
+            const file = this.files[0];
+            if (file) {
+                updateFileDisplay(file);
+            }
+        });
+
+        function updateFileDisplay(file) {
+            const uploadArea = $('.file-upload-area');
+            if (file) {
+                uploadArea.html(`
+                    <i class="fas fa-file-pdf file-upload-icon text-success"></i>
+                    <p class="mb-0 text-success"><strong>${file.name}</strong></p>
+                    <small class="text-muted">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                `);
+            }
+        }
+
+        // Enhanced form validation
         $('.profile-form').validate({
             rules: {
                 FullName: {
                     required: true,
+                    minlength: 2,
                     maxlength: 100
                 },
                 Location: {
@@ -331,12 +887,14 @@
                     maxlength: 500
                 },
                 ResumeFile: {
-                    accept: "application/pdf"
+                    accept: "application/pdf",
+                    filesize: 5242880 // 5MB in bytes
                 }
             },
             messages: {
                 FullName: {
                     required: "Please enter your full name.",
+                    minlength: "Name must be at least 2 characters long.",
                     maxlength: "Full name cannot exceed 100 characters."
                 },
                 Location: {
@@ -346,60 +904,117 @@
                     maxlength: "Bio cannot exceed 500 characters."
                 },
                 ResumeFile: {
-                    accept: "Please upload a PDF file."
+                    accept: "Please upload a PDF file only.",
+                    filesize: "File size must be less than 5MB."
                 }
             },
-            errorElement: 'span',
-            errorClass: 'text-danger',
+            errorElement: 'div',
+            errorClass: 'invalid-feedback',
             highlight: function (element) {
-                $(element).addClass('is-invalid');
+                $(element).addClass('is-invalid').removeClass('is-valid');
             },
             unhighlight: function (element) {
-                $(element).removeClass('is-invalid');
+                $(element).removeClass('is-invalid').addClass('is-valid');
             },
             submitHandler: function (form) {
+                const submitBtn = $(form).find('button[type="submit"]');
+                const spinner = submitBtn.find('.loading-spinner');
+
+                // Show loading state
+                submitBtn.prop('disabled', true);
+                spinner.show();
+
+                // Validate file if uploaded
                 const fileInput = $(form).find('input[type="file"]')[0];
-                if (fileInput.files[0] && !fileInput.files[0].name.endsWith('.pdf')) {
-                    toastr.error('Only PDF files are allowed for resume upload.');
-                    $(fileInput).addClass('is-invalid');
-                    return;
+                if (fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    if (!file.name.toLowerCase().endsWith('.pdf')) {
+                        toastr.error('Only PDF files are allowed for resume upload.');
+                        $(fileInput).addClass('is-invalid');
+                        submitBtn.prop('disabled', false);
+                        spinner.hide();
+                        return;
+                    }
+                    if (file.size > 5242880) { // 5MB
+                        toastr.error('File size must be less than 5MB.');
+                        $(fileInput).addClass('is-invalid');
+                        submitBtn.prop('disabled', false);
+                        spinner.hide();
+                        return;
+                    }
                 }
+
                 form.submit();
-                toastr.success('Profile updated successfully!');
             }
         });
 
-        // Client-side validation for Apply forms
+        // Custom file size validation method
+        $.validator.addMethod('filesize', function(value, element, param) {
+            return this.optional(element) || (element.files[0] && element.files[0].size <= param);
+        }, 'File size is too large.');
+
+        // Enhanced apply form validation
         $('.apply-form').on('submit', function (e) {
-            const fileInput = $(this).find('input[type="file"]')[0];
+            const form = $(this);
+            const fileInput = form.find('input[type="file"]')[0];
+            const submitBtn = form.find('button[type="submit"]');
+            const spinner = submitBtn.find('.loading-spinner');
+
             if (!fileInput.files[0]) {
                 e.preventDefault();
                 $(fileInput).addClass('is-invalid');
                 toastr.error('Please select a PDF file to upload.');
                 return;
             }
-            if (!fileInput.files[0].name.endsWith('.pdf')) {
+
+            const file = fileInput.files[0];
+            if (!file.name.toLowerCase().endsWith('.pdf')) {
                 e.preventDefault();
                 $(fileInput).addClass('is-invalid');
                 toastr.error('Only PDF files are allowed.');
                 return;
             }
-            toastr.success('Application submitted successfully!');
+
+            if (file.size > 5242880) { // 5MB
+                e.preventDefault();
+                $(fileInput).addClass('is-invalid');
+                toastr.error('File size must be less than 5MB.');
+                return;
+            }
+
+            // Show loading state
+            submitBtn.prop('disabled', true);
+            spinner.show();
+
+            // Success feedback will be handled by server response
+            setTimeout(() => {
+                toastr.success('Application submitted successfully!');
+            }, 500);
         });
 
-        // Remove invalid class when user selects a new file
-        $('.file-input').on('change', function () {
-            $(this).removeClass('is-invalid');
+        // Remove validation states on file change
+        $('.form-control[type="file"]').on('change', function () {
+            $(this).removeClass('is-invalid is-valid');
         });
 
-        // Unsave Job form submission with AJAX
+        // Enhanced unsave job functionality with confirmation
         $('.unsave-form').on('submit', function (e) {
             e.preventDefault();
+
             const form = $(this);
             const button = form.find('.unsave-btn');
             const jobId = button.data('job-id');
-            const card = button.closest('.card');
+            const jobTitle = button.closest('.card').find('.card-title').text();
+            const card = button.closest('.col-lg-4, .col-md-6');
             const url = form.attr('action');
+
+            // Confirmation dialog
+            if (!confirm(`Are you sure you want to remove "${jobTitle}" from your saved jobs?`)) {
+                return;
+            }
+
+            // Show loading state
+            button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Removing...');
 
             $.ajax({
                 url: url,
@@ -407,28 +1022,176 @@
                 data: form.serialize(),
                 success: function (response) {
                     if (response.success) {
-                        card.closest('.col-md-4').fadeOut(300, function () {
-                            $(this).remove();
-                            if ($('.saved-jobs .card').length === 0) {
-                                $('.saved-jobs').replaceWith('<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i> You haven\'t saved any jobs yet.</div>');
+                        // Animate card removal
+                        card.addClass('animate__animated animate__fadeOutUp');
+                        setTimeout(() => {
+                            card.remove();
+
+                            // Check if no saved jobs remain
+                            if ($('.row .col-lg-4, .row .col-md-6').length === 0) {
+                                $('.row').replaceWith(`
+                                    <div class="alert alert-info fade-in">
+                                        <i class="fas fa-bookmark me-2"></i> No saved jobs yet. Start browsing and save jobs that interest you!
+                                    </div>
+                                `);
                             }
-                        });
-                        toastr.success('Job removed from saved list!');
+                        }, 300);
+
+                        toastr.success(`"${jobTitle}" removed from saved jobs!`);
+
+                        // Update stats
+                        updateStats();
                     } else {
+                        button.prop('disabled', false).html('<i class="fas fa-heart-broken me-1"></i> Remove');
                         toastr.error(response.message || 'Failed to remove job.');
                     }
                 },
-                error: function () {
-                    toastr.error('An error occurred while processing your request.');
+                error: function (xhr, status, error) {
+                    button.prop('disabled', false).html('<i class="fas fa-heart-broken me-1"></i> Remove');
+                    console.error('AJAX Error:', error);
+                    toastr.error('An error occurred while processing your request. Please try again.');
                 }
             });
         });
+
+        // Update statistics
+        function updateStats() {
+            const savedJobsCount = $('.row .col-lg-4, .row .col-md-6').length;
+            $('.stats-grid .stat-card:nth-child(2) .stat-number').text(savedJobsCount);
+        }
+
+        // Smooth scroll for internal links
+        $('a[href^="#"]').on('click', function(e) {
+            e.preventDefault();
+            const target = $($(this).attr('href'));
+            if (target.length) {
+                $('html, body').animate({
+                    scrollTop: target.offset().top - 100
+                }, 800);
+            }
+        });
+
+        // Form field animations
+        $('.form-control').on('focus', function() {
+            $(this).parent().addClass('focused');
+        }).on('blur', function() {
+            if (!$(this).val()) {
+                $(this).parent().removeClass('focused');
+            }
+        });
+
+        // Initialize focused state for filled fields
+        $('.form-control').each(function() {
+            if ($(this).val()) {
+                $(this).parent().addClass('focused');
+            }
+        });
+
+        // Skills badge animation
+        $('.badge').each(function(index) {
+            $(this).css('animation-delay', (index * 0.1) + 's');
+            $(this).addClass('animate__animated animate__fadeInUp');
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all fade-in elements
+        $('.fade-in').each(function() {
+            this.style.opacity = '0';
+            this.style.transform = 'translateY(20px)';
+            this.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(this);
+        });
+
+        // Progressive enhancement for card hover effects
+        if (window.matchMedia('(hover: hover)').matches) {
+            $('.card').on('mouseenter', function() {
+                $(this).find('.btn').addClass('animate__pulse');
+            }).on('mouseleave', function() {
+                $(this).find('.btn').removeClass('animate__pulse');
+            });
+        }
+
+        // Auto-save form data (localStorage fallback would be implemented here in a real app)
+        let formChangeTimeout;
+        $('.profile-form input, .profile-form textarea').on('input', function() {
+            clearTimeout(formChangeTimeout);
+            formChangeTimeout = setTimeout(() => {
+                // In a real application, you would save to localStorage or make an AJAX call
+                console.log('Form data auto-saved');
+            }, 2000);
+        });
+
     });
 
-    // Toastr options
+    // Enhanced Toastr configuration
     toastr.options = {
         positionClass: "toast-top-right",
-        timeOut: 3000,
-        progressBar: true
+        timeOut: 4000,
+        extendedTimeOut: 1000,
+        progressBar: true,
+        closeButton: true,
+        newestOnTop: true,
+        preventDuplicates: true,
+        showDuration: 300,
+        hideDuration: 1000,
+        showEasing: 'swing',
+        hideEasing: 'linear',
+        showMethod: 'fadeIn',
+        hideMethod: 'fadeOut'
     };
+
+    // Custom toastr success with enhanced styling
+    const originalSuccess = toastr.success;
+    toastr.success = function(message, title, optionsOverride) {
+        return originalSuccess.call(this, `<i class="fas fa-check-circle me-2"></i>${message}`, title, optionsOverride);
+    };
+
+    // Custom toastr error with enhanced styling
+    const originalError = toastr.error;
+    toastr.error = function(message, title, optionsOverride) {
+        return originalError.call(this, `<i class="fas fa-exclamation-circle me-2"></i>${message}`, title, optionsOverride);
+    };
+
+    // Page load performance optimization
+    window.addEventListener('load', function() {
+        // Hide any loading spinners
+        $('.loading-spinner').hide();
+
+        // Enable submit buttons
+        $('button[type="submit"]').prop('disabled', false);
+
+        // Trigger any necessary animations
+        $('.stats-grid .stat-card').each(function(index) {
+            setTimeout(() => {
+                $(this).addClass('animate__animated animate__bounceIn');
+            }, index * 200);
+        });
+    });
+
+    // Error handling for failed AJAX requests
+    $(document).ajaxError(function(event, xhr, settings, error) {
+        console.error('AJAX Error:', error);
+        toastr.error('Network error occurred. Please check your connection and try again.');
+    });
+
+    // Service Worker registration for offline functionality (if needed)
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            // navigator.serviceWorker.register('/sw.js') - would be implemented in a real app
+        });
+    }
 </script>

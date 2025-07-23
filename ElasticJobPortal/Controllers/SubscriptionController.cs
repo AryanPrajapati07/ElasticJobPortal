@@ -70,6 +70,17 @@ namespace ElasticJobPortal.Controllers
             return View(); // Buy.cshtml
         }
 
+        public async Task<IActionResult> MyPayments()
+        {
+            var userId = _userManager.GetUserId(User);
+            var payments = await _context.PaymentDetails
+                .Where(p => p.UserId == userId)
+                .OrderByDescending(p => p.PaymentDate)
+                .ToListAsync();
+            return View(payments);
+        }
+
+
 
     }
 }
