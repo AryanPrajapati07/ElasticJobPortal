@@ -2,6 +2,7 @@ using ElasticJobPortal.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using ElasticJobPortal.Models;
 
 
 
@@ -19,7 +20,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
-
+builder.Services.Configure<RazorpaySettings>(builder.Configuration.GetSection("Razorpay"));
 
 
 // ✅ Identity cookie paths

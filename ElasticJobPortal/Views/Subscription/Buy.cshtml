@@ -1,0 +1,308 @@
+﻿@{
+    ViewData["Title"] = "Buy Subscription";
+    var price = ViewBag.Price;
+    var planName = ViewBag.PlanName;
+    var planId = ViewBag.PlanId;
+    var duration = ViewBag.Duration;
+}
+
+<div class="container mt-1">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h2 class="mb-0 h4">
+                        <i class="fas fa-crown me-2"></i>
+                        Subscribe to Premium
+                    </h2>
+                </div>
+                <div class="card-body p-5">
+                    <!-- Plan Details -->
+                    <div class="text-center mb-4">
+                        <div class="plan-badge bg-light rounded-pill px-3 py-2 d-inline-block mb-3">
+                            <span class="text-muted small">PLAN</span>
+                            <h3 class="mb-0 text-primary fw-bold">@planName</h3>
+                        </div>
+                        <div class="price-display">
+                            <span class="h2 fw-bold text-dark">₹@price</span>
+                            <span class="text-muted">/@duration</span>
+                        </div>
+                    </div>
+
+                    <!-- Features (you can customize based on your plans) -->
+                    <div class="features-list mb-4">
+                        <h5 class="mb-3">What's included:</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Unlimited job applications
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Priority support
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Advanced profile features
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                Resume builder access
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Payment Button -->
+                    <div class="d-grid gap-2">
+                        <button id="rzp-button" class="btn btn-success btn-lg py-3" disabled>
+                            <span class="spinner-border spinner-border-sm d-none" id="loading-spinner"></span>
+                            <span id="button-text">
+                                <i class="fas fa-lock me-2"></i>
+                                Secure Payment - ₹@price
+                            </span>
+                        </button>
+                        <small class="text-muted text-center mt-2">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            Secured by Razorpay • 256-bit SSL encryption
+                        </small>
+                    </div>
+
+                    <!-- Terms -->
+                    <div class="mt-4 text-center">
+                        <small class="text-muted">
+                            By subscribing, you agree to our
+                            <a href="https://razorpay.com/terms/" class="text-decoration-none">Terms of Service</a> and
+                            <a href="https://razorpay.com/privacy/" class="text-decoration-none">Privacy Policy</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-5">
+                <div class="text-success mb-3">
+                    <i class="fas fa-check-circle" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="text-success mb-3">Payment Successful!</h4>
+                <p class="mb-4">Your subscription to <strong>@planName</strong> has been activated.</p>
+                <p class="text-muted small mb-4">Payment ID: <span id="payment-id"></span></p>
+                <button type="button" class="btn btn-primary" onclick="window.location.href='/Dashboard'">
+                    Go to Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-5">
+                <div class="text-danger mb-3">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 4rem;"></i>
+                </div>
+                <h4 class="text-danger mb-3">Payment Failed</h4>
+                <p class="mb-4" id="error-message">Something went wrong with your payment. Please try again.</p>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Try Again
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        // Enable button after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById("rzp-button").disabled = false;
+        });
+
+        document.getElementById("rzp-button").onclick = async function () {
+            const button = this;
+            const buttonText = document.getElementById("button-text");
+            const spinner = document.getElementById("loading-spinner");
+
+            // Show loading state
+            button.disabled = true;
+            spinner.classList.remove("d-none");
+            buttonText.innerHTML = '<span class="ms-2">Processing...</span>';
+
+            try {
+                const response = await fetch("/Payment/CreateOrder", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    },
+                    body: JSON.stringify({
+                        amount: @price,
+                        planName: "@planName",
+                        planId: "@planId"
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const order = await response.json();
+
+                if (!order.id) {
+                    throw new Error("Invalid order response from server");
+                }
+
+                const options = {
+                    "key": "rzp_test_kLX7L8BYDbH8a2", // Replace with your actual key
+                    "amount": order.amount,
+                    "currency": "INR",
+                    "name": "Elastic Job Portal",
+                    "description": "Subscription - @planName",
+                    "order_id": order.id,
+                    "handler": function (response) {
+                        // Success handler
+                        document.getElementById("payment-id").textContent = response.razorpay_payment_id;
+                        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                        successModal.show();
+
+                        // Optional: Send payment details to server for verification
+                        verifyPayment(response);
+                    },
+                    "modal": {
+                        "ondismiss": function() {
+                            // Reset button when payment modal is closed
+                            resetButton();
+                        }
+                    },
+                    "theme": {
+                        "color": "#28a745"
+                    },
+                    "prefill": {
+                        "name": "@(ViewBag.UserName ?? "")",
+                        "email": "@(ViewBag.UserEmail ?? "")",
+                        "contact": "@(ViewBag.UserPhone ?? "")"
+                    }
+                };
+
+                const rzp1 = new Razorpay(options);
+
+                rzp1.on('payment.failed', function (response) {
+                    document.getElementById("error-message").textContent =
+                        response.error.description || "Payment failed. Please try again.";
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    errorModal.show();
+                    resetButton();
+                });
+
+                rzp1.open();
+
+            } catch (error) {
+                console.error("Error creating order:", error);
+                document.getElementById("error-message").textContent =
+                    "Unable to process payment. Please check your connection and try again.";
+                const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                errorModal.show();
+                resetButton();
+            }
+        };
+
+        function resetButton() {
+            const button = document.getElementById("rzp-button");
+            const buttonText = document.getElementById("button-text");
+            const spinner = document.getElementById("loading-spinner");
+
+            button.disabled = false;
+            spinner.classList.add("d-none");
+            buttonText.innerHTML = '<i class="fas fa-lock me-2"></i>Secure Payment - ₹@price';
+        }
+
+        async function verifyPayment(paymentResponse) {
+            try {
+                const response = await fetch("/Payment/VerifyPayment", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    },
+                    body: JSON.stringify({
+                        razorpay_order_id: paymentResponse.razorpay_order_id,
+                        razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                        razorpay_signature: paymentResponse.razorpay_signature,
+                        planId: "@planId"
+                    })
+                });
+
+                if (response.ok) {
+                    console.log("Payment verified successfully");
+                } else {
+                    console.warn("Payment verification failed");
+                }
+            } catch (error) {
+                console.error("Error verifying payment:", error);
+            }
+        }
+    </script>
+}
+
+<style>
+    .plan-badge {
+        border: 2px solid #e9ecef;
+    }
+
+    .price-display {
+        padding: 1rem 0;
+        border-bottom: 1px solid #e9ecef;
+        margin-bottom: 1rem;
+    }
+
+    .features-list {
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 1rem;
+    }
+
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        border-bottom: none;
+    }
+
+    .btn-lg {
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        .btn-lg:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+    .modal-content {
+        border-radius: 15px;
+        border: none;
+    }
+
+    (max-width: 768px) {
+        .container
+
+    {
+        padding: 0 15px;
+    }
+
+    .card-body {
+        padding: 2rem 1.5rem;
+    }
+
+    }
+</style>

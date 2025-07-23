@@ -55,8 +55,21 @@ namespace ElasticJobPortal.Controllers
            
             return View(subscription);
 
-
         }
+
+        public async Task<IActionResult> Buy(int id)
+        {
+            var plan = await _context.SubscriptionPlans.FindAsync(id);
+            if (plan == null) return NotFound();
+
+            ViewBag.PlanId = plan.Id;
+            ViewBag.PlanName = plan.Name;
+            ViewBag.Price = Convert.ToDecimal(plan.Price);
+            ViewBag.Duration = plan.Duration;
+
+            return View(); // Buy.cshtml
+        }
+
 
     }
 }
