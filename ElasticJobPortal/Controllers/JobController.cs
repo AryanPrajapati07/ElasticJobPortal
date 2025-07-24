@@ -18,13 +18,15 @@ namespace ElasticJobPortal.Controllers
 
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _usermanager;
+        private readonly IEmailService _emailService;
 
 
-        public JobController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public JobController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService)
         {
 
             _context = context;
             _usermanager = userManager;
+            _emailService = emailService;
         }
 
         //Job Post
@@ -91,7 +93,7 @@ namespace ElasticJobPortal.Controllers
         {
             var userId = _usermanager.GetUserId(User);
 
-            // ✅ Check if already applied
+            // Check if already applied
             var alreadyApplied = await _context.JobApplications
                 .AnyAsync(a => a.JobId == jobId && a.UserId == userId);
 
@@ -101,7 +103,7 @@ namespace ElasticJobPortal.Controllers
                 return RedirectToAction("AvailableJobs");
             }
 
-            // ✅ Upload resume
+            // Upload resume
             string resumePath = null;
             if (resumeFile != null && resumeFile.Length > 0)
             {
@@ -119,7 +121,7 @@ namespace ElasticJobPortal.Controllers
                 resumePath = $"/resumes/{uniqueFileName}";
             }
 
-            // ✅ Save to DB
+            // Save to DB
             var application = new JobApplication
             {
                 JobId = jobId,
@@ -131,27 +133,22 @@ namespace ElasticJobPortal.Controllers
             _context.JobApplications.Add(application);
             await _context.SaveChangesAsync();
 
-            // ✅ Send Email to Admin
+            // Send Email to Admin
 
 
-
+            // Fetch Job and User Details for Email
             var job = await _context.Jobs.FindAsync(jobId);
-            var emailService = new EmailService();
+            var user = await _usermanager.GetUserAsync(User); // get full ApplicationUser object
 
-            var emailBody = $@"
-    <h3>📄 New Job Application </h3>
-    <p><strong>Job Title:</strong> {job?.Title}</p>
-    <p><strong>Company:</strong> {job?.Company}</p>
-    <p><strong>Applied On:</strong> {DateTime.Now.ToString("f")}</p>";
-
-            if (!string.IsNullOrEmpty(resumePath))
+            // Send Email to User
+            if (user != null && job != null)
             {
-                var fullResumeUrl = $"{Request.Scheme}://{Request.Host}{resumePath}";
-                emailBody += $"<p><strong>Resume:</strong> <a href='{fullResumeUrl}'>View Resume</a></p>";
+                await _emailService.SendEmailAsync(
+                    user.Email,
+                    "Job Application Submitted",
+                    $"You have successfully applied for <b>{job.Title}</b>. Thank you for using our portal!"
+                );
             }
-
-            await emailService.SendEmailAsync("aryanprajapati5523@gmail.com", "New Job Application",
-               emailBody);
 
             TempData["SuccessMessage"] = "Application submitted successfully!";
             return RedirectToAction("AvailableJobs");

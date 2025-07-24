@@ -12,11 +12,13 @@ namespace ElasticJobPortal.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IEmailService _emailService;
 
-        public SubscriptionController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public SubscriptionController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService)
         {
             _context = context;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         public IActionResult Plans()
@@ -43,6 +45,9 @@ namespace ElasticJobPortal.Controllers
             };
             _context.JobSeekerSubscriptions.Add(subscription);
             await _context.SaveChangesAsync();
+
+            
+
             return RedirectToAction("MySubscription");
         }
 
@@ -76,8 +81,19 @@ namespace ElasticJobPortal.Controllers
                 return RedirectToAction("MySubscription");
             }
 
+            // Fetch the user and send confirmation email
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                await _emailService.SendEmailAsync(
+                    user.Email,
+                    "Subscription Successful",
+                    $"Thanks for subscribing to the <b>{plan.Name}</b> plan. Enjoy the features!"
+                );
+            }
 
-                return View(); // Buy.cshtml
+
+            return View(); // Buy.cshtml
         }
 
         public async Task<IActionResult> MyPayments()

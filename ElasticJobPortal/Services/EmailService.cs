@@ -1,30 +1,38 @@
-﻿using MailKit.Net.Smtp;
+﻿using ElasticJobPortal.Models;
+using MailKit.Net.Smtp;
+using Microsoft.Extensions.Options;
 using MimeKit;
+using System.Net;
+using System.Net.Mail;
 
 namespace ElasticJobPortal.Services
 {
-    public class EmailService
+    public class EmailService : IEmailService
     {
-        public async Task SendEmailAsync(string to, string subject, string body)
+        private readonly EmailSettings _settings;
+
+        public EmailService(IOptions<EmailSettings> options)
         {
-            var email = new MimeMessage();
-            email.From.Add(MailboxAddress.Parse("aryanprajapati5523@gmail.com"));
-            email.To.Add(MailboxAddress.Parse(to));
-            email.Subject = subject;
+            _settings = options.Value;
+        }
 
-            // Fix: Create a BodyBuilder to handle HTML or plain text content
-            var bodyBuilder = new BodyBuilder
+        public async Task SendEmailAsync(string toEmail, string subject, string body)
+        {
+            var mail = new MailMessage
             {
-                TextBody = body, // Plain text body
-                HtmlBody = $"<p>{body}</p>" // HTML body
+                From = new MailAddress(_settings.SenderEmail, _settings.SenderName),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true
             };
-            email.Body = bodyBuilder.ToMessageBody();
+            mail.To.Add(toEmail);
 
-            using var smtp = new SmtpClient();
-            await smtp.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync("aryanprajapati5523@gmail.com", "bojvatecoqvsxjds");
-            await smtp.SendAsync(email);
-            await smtp.DisconnectAsync(true);
+            using var smtp = new System.Net.Mail.SmtpClient(_settings.SmtpServer, _settings.SmtpPort)
+            {
+                Credentials = new NetworkCredential(_settings.SenderEmail, _settings.Password),
+                EnableSsl = true
+            };
+            await smtp.SendMailAsync(mail);
         }
     }
 }

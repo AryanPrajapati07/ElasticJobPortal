@@ -17,11 +17,13 @@ namespace ElasticJobPortal.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _usermanager;
+        private readonly IEmailService _emailService;
 
-        public QuizController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public QuizController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService)
         {
             _context = context;
             _usermanager = userManager;
+            _emailService = emailService;
         }
 
         public async Task<IActionResult> Index() 
@@ -68,6 +70,18 @@ namespace ElasticJobPortal.Controllers
 
             _context.QuizResults.Add(result);
             await _context.SaveChangesAsync();
+
+            // Fetch user info
+            var user = await _usermanager.FindByIdAsync(userId);
+            var category = await _context.QuizCategories.FindAsync(categoryId);
+
+            // Send email notification
+            await _emailService.SendEmailAsync(
+                user.Email,
+                "Quiz Completed",
+                $"<p>Hi {user.FullName},</p><p>Congratulations! 🎉</p><p>You have successfully completed the quiz <strong>{category.Name}</strong> with a score of <strong>{correct}/{answers.Count}</strong>.</p><p>Keep up the great work!</p><br><p>- ElasticJobPortal Team</p>"
+            );
+
 
 
             return RedirectToAction("Result", new { id = result.Id});
