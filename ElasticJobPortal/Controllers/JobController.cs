@@ -58,7 +58,7 @@ namespace ElasticJobPortal.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AllApplications()
+        public async Task<IActionResult> AllApplications(string status = "all")
         {
             var applications = await _context.JobApplications
                 .Include(a => a.Job)
@@ -201,7 +201,7 @@ namespace ElasticJobPortal.Controllers
 
             // No sorting applied here
             var jobsQuery = _context.Jobs
-                .Where(j =>
+                .Where(j => !j.IsExpired ||
                     string.IsNullOrEmpty(keyword) ||
                     j.Title.Contains(keyword) ||
                     j.Description.Contains(keyword)

@@ -21,7 +21,10 @@ namespace ElasticJobPortal.Models
         [Required(ErrorMessage = "JobType is required")]
         public string JobType { get; set; }
 
-      
+        public DateTime PosAt { get; set; }
+        public int DurationInDays { get; set; }
+
+        public bool IsExpired => DateTime.UtcNow > PosAt.AddDays(DurationInDays);
 
         // Save to DB as CSV string
         public string SkillsCsv { get; set; }

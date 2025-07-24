@@ -222,6 +222,16 @@
                             <strong>Job Type:</strong> @job.JobType<br />
                             <strong>Skills:</strong> @job.SkillsCsv
                         </p>
+                        <p><strong>Posted:</strong> @job.PosAt.ToShortDateString()</p>
+
+                        @if (job.IsExpired)
+                        {
+                            <span class="badge bg-danger">Expired</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
                         <div class="d-flex align-items-center">
                             @if (appliedJobIds.Contains(job.Id))
                             {
