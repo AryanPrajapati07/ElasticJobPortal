@@ -9,7 +9,6 @@ using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 
 
-
 namespace ElasticJobPortal.Controllers
 {
     [Authorize(Roles ="JobSeeker")]
@@ -82,8 +81,6 @@ namespace ElasticJobPortal.Controllers
                 $"<p>Hi {user.FullName},</p><p>Congratulations! 🎉</p><p>You have successfully completed the quiz <strong>{category.Name}</strong> with a score of <strong>{correct}/{answers.Count}</strong>.</p><p>Keep up the great work!</p><br><p>- ElasticJobPortal Team</p>"
             );
 
-
-
             return RedirectToAction("Result", new { id = result.Id});
 
         }
@@ -94,9 +91,6 @@ namespace ElasticJobPortal.Controllers
                 .Include(r => r.Category)
                 .FirstOrDefaultAsync(r => r.Id == id);
             if (result == null) return NotFound();
-
-            
-            
 
             return View(result);
         }
