@@ -89,9 +89,9 @@ namespace ElasticJobPortal.Controllers
         }
 
         
-        public IActionResult ExternalLogin(string provider)
+        public IActionResult ExternalLogin(string provider, string returnUrl = null)
         {
-            var redirectUrl = Url.Action("ExternalLoginCallback", "Account");
+            var redirectUrl = Url.Action("ExternalLoginCallback", "Account", new {ReturnUrl = returnUrl});
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return Challenge(properties, provider);
         }
@@ -100,13 +100,14 @@ namespace ElasticJobPortal.Controllers
         {
            if(remoteError != null) { 
                 ModelState.AddModelError(string.Empty, $"External login error: {remoteError}");
-                return RedirectToAction("Login");
+                return Redirect("Identity/Account/Login");
+
             }
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                return RedirectToAction("Login");
+                return Redirect("Identity/Account/Login");
             }
 
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false);
