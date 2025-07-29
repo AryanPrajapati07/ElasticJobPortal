@@ -10,6 +10,9 @@ public class ProfileViewModel
     public IFormFile ResumeFile { get; set; }
     public string? ResumePath { get; set; }
 
+    public string ResumeKeywords { get; set; }
+
+
     public List<JobApplication> Applications { get; set; }
     public List<SavedJob> SavedJobs { get; set; }
 }

@@ -8,4 +8,6 @@ public class ApplicationUser : IdentityUser
     public string Location { get; set; }
     public string ResumePath { get; set; }
 
+    public string ResumeKeywords { get; set; } // Comma-separated keywords for resume search
+
 }

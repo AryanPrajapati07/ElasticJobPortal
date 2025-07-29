@@ -26,6 +26,8 @@ namespace ElasticJobPortal.Models
 
         public bool IsExpired => DateTime.UtcNow > PosAt.AddDays(DurationInDays);
 
+        public string Tags { get; set; } //comma separated tags like "C#, ASP.NET, SQL"
+
         // Save to DB as CSV string
         public string SkillsCsv { get; set; }
 

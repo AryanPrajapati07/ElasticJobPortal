@@ -1,4 +1,5 @@
-﻿using ElasticJobPortal.Models;
+﻿using ElasticJobPortal.Helpers;
+using ElasticJobPortal.Models;
 using ElasticJobPortal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -19,14 +20,16 @@ namespace ElasticJobPortal.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _usermanager;
         private readonly IEmailService _emailService;
+        private readonly RecommendationService _recommendationService;
 
 
-        public JobController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService)
+        public JobController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService,RecommendationService recommendationService)
         {
 
             _context = context;
             _usermanager = userManager;
             _emailService = emailService;
+            _recommendationService = recommendationService;
         }
 
         //Job Post
@@ -267,5 +270,32 @@ namespace ElasticJobPortal.Controllers
             return View(saved);
 
         }
+
+        [Authorize(Roles = "JobSeeker")]
+        public async Task<IActionResult> RecommendedJobs()
+        {
+            var user = await _usermanager.GetUserAsync(User);
+            ViewBag.ResumeKeywords = user.ResumeKeywords;
+
+            if (string.IsNullOrEmpty(user.ResumePath))
+            {
+                ViewBag.Message = "Please upload a resume to get job recommendations.";
+                return View(new List<Job>());
+            }
+
+            var resumeKeywords = ResumeParser.ExtractKeywordsFromPdf(user.ResumePath); // ✅ returns List<string>
+
+            var allJobs = _context.Jobs.ToList();
+
+            var matchedJobs = allJobs.Where(job =>
+            {
+                var jobTags = job.Tags?.ToLower().Split(',').Select(t => t.Trim()) ?? Enumerable.Empty<string>();
+                return jobTags.Intersect(resumeKeywords).Any();
+            }).ToList();
+
+            return View(matchedJobs);
+        }
+
+
     }
 }

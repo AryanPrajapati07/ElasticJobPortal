@@ -6,6 +6,7 @@
 }
 <style>
     .btn-google {
+        margin-top:10px;
         width: 100%;
         display: flex;
         align-items: center;
@@ -34,9 +35,29 @@
     .google-icon {
         flex-shrink: 0;
     }
+
+    .row{
+        display: flex;
+        flex-direction: row;
+        backdrop-filter: blur(10px);
+        margin-bottom: 20px;
+        
+        padding: 10px;
+        border-radius: 8px;
+        background-color: rgba(255, 255, 255, 0.8);
+    }
+
+    .col-md-4{
+        margin-left:350px;
+        width:50%;
+        display: flex;
+        background-color: #f8f9fa;
+        
+    }
+
+}
 </style>
 
-<h1>@ViewData["Title"]</h1>
 <div class="row">
     <div class="col-md-4">
         <section>

@@ -51,7 +51,7 @@ namespace ElasticJobPortal.Controllers
                 // Optional: sign in the user after registration
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("AvailableJobs", "Job");
             }
 
             // Add error handling
@@ -76,7 +76,7 @@ namespace ElasticJobPortal.Controllers
             var result = await _signInManager.PasswordSignInAsync(email, password, false, false);
             if (result.Succeeded)
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("AvailableJobs", "Job");
             }
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return View();
@@ -146,7 +146,7 @@ namespace ElasticJobPortal.Controllers
             {
                 return Redirect(returnUrl);
             }
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("AvailableJobs", "Job");
         }
 
     }

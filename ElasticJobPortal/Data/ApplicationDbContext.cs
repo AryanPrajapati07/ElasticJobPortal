@@ -6,15 +6,9 @@ namespace ElasticJobPortal.Services
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
-
         public DbSet<Job> Jobs { get; set; }
         public DbSet<JobApplication> JobApplications { get; set; }
         public DbSet<SavedJob> SavedJobs { get; set; }
-
         public DbSet<QuizCategory> QuizCategories { get; set; }
         public DbSet<QuizQuestion> QuizQuestions { get; set; }
         public DbSet<QuizAnswer> QuizAnswers { get; set; }
@@ -23,10 +17,13 @@ namespace ElasticJobPortal.Services
         public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
         public DbSet<JobSeekerSubscription> JobSeekerSubscriptions { get; set; }
         public DbSet<PaymentDetail> PaymentDetails { get; set; }
+        public DbSet<Resume> Resumes { get; set; }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
 
-
-
-
+       
 
     }
 }

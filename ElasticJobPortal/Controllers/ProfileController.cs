@@ -1,4 +1,5 @@
 ﻿
+using ElasticJobPortal.Helpers;
 using ElasticJobPortal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -32,6 +33,7 @@ namespace ElasticJobPortal.Controllers
                 Location = user.Location,
                 ResumePath = user.ResumePath,
                 Email = user.Email,
+                ResumeKeywords = user.ResumeKeywords,
                 Applications = await _context.JobApplications
                     .Include(a => a.Job)
                     .Where(a => a.UserId == user.Id)
@@ -104,23 +106,33 @@ namespace ElasticJobPortal.Controllers
         [HttpPost]
         public async Task<IActionResult> UploadResume(IFormFile resumeFile)
         {
-
             var user = await _usermanager.GetUserAsync(User);
-            if (resumeFile != null && resumeFile.Length>0)
+            if (user == null) return RedirectToAction("Login", "Account");
+
+            // Save file
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(resumeFile.FileName);
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/resumes", fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "resumes");
-                Directory.CreateDirectory(uploads);
-                var fileName = $"{Guid.NewGuid()}_{resumeFile.FileName}";
-                var filePath = Path.Combine(uploads, fileName);
-                using var stream = new FileStream(filePath, FileMode.Create);
                 await resumeFile.CopyToAsync(stream);
-
-                user.ResumePath = $"/resumes/{fileName}";
-                await _usermanager.UpdateAsync(user);
             }
-            return RedirectToAction("Dashboard");
 
+            // Save resume path
+            user.ResumePath = "/resumes/" + fileName;
+
+            
+            user.ResumeKeywords = string.Join(", ", ResumeParser.ExtractKeywordsFromPdf(user.ResumePath));
+
+            System.IO.File.WriteAllText("keywords_debug.txt", user.ResumeKeywords ?? "null");
+            await _usermanager.UpdateAsync(user);
+            // Temporary debug log
+            
+
+            TempData["Success"] = "Resume uploaded and keywords saved successfully.";
+            return RedirectToAction("Profile");
         }
+
 
 
     }
