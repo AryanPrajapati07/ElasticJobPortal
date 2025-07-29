@@ -1,6 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using iTextSharp.text.pdf.parser;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Text;
+using System.Text.RegularExpressions;
+using Path = System.IO.Path;
 
 namespace ElasticJobPortal.Controllers
 {
@@ -9,15 +14,18 @@ namespace ElasticJobPortal.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            IWebHostEnvironment webHostEnvironment)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [HttpGet]
@@ -28,7 +36,7 @@ namespace ElasticJobPortal.Controllers
 
         [HttpPost]
         [HttpPost]
-        public async Task<IActionResult> Register(string email, string password, string role)
+        public async Task<IActionResult> Register(string email, string password, string role, IFormFile resumeFile)
         {
             var user = new ApplicationUser
             {
@@ -37,6 +45,30 @@ namespace ElasticJobPortal.Controllers
             };
 
             var result = await _userManager.CreateAsync(user, password);
+
+            if (resumeFile != null && resumeFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "resumes");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(resumeFile.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await resumeFile.CopyToAsync(fileStream);
+                }
+
+                // PDF Extraction
+                var extractedText = ExtractTextFromPdf(filePath); // 🔺 create this method
+                var skillsOnly = ExtractSkills(extractedText);     // 🔺 and this method
+
+                user.ResumePath = "/resumes/" + uniqueFileName;
+                user.ResumeKeywords = skillsOnly;
+
+                await _userManager.UpdateAsync(user); // 🔥 This saves to DB
+            }
 
             if (result.Succeeded)
             {
@@ -61,6 +93,24 @@ namespace ElasticJobPortal.Controllers
             }
 
             return View();
+        }
+         public string ExtractTextFromPdf(string filePath)
+        {
+            using (var reader = new iTextSharp.text.pdf.PdfReader(filePath))
+            {
+                StringBuilder text = new StringBuilder();
+                for (int i = 1; i <= reader.NumberOfPages; i++)
+                {
+                    text.Append(PdfTextExtractor.GetTextFromPage(reader, i));
+                }
+                return text.ToString();
+            }
+        }
+
+        public string ExtractSkills(string text)
+        {
+            var skillsMatch = Regex.Match(text, @"SKILLS\s+(.*?)(?:PROJECTS|CERTIFICATION|EDUCATION|LANGUAGES|STRENGTHS)", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+            return skillsMatch.Success ? skillsMatch.Groups[1].Value.Trim() : "";
         }
 
 

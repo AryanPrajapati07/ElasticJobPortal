@@ -2,6 +2,7 @@
 using ElasticJobPortal.Helpers;
 using ElasticJobPortal.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +15,13 @@ namespace ElasticJobPortal.Controllers
     {
         private readonly UserManager<ApplicationUser> _usermanager;
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ProfileController(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+        public ProfileController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _usermanager = userManager;
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         [HttpGet]
@@ -104,34 +107,57 @@ namespace ElasticJobPortal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadResume(IFormFile resumeFile)
+        [Authorize(Roles = "JobSeeker")]
+        public async Task<IActionResult> UploadResume(IFormFile resume)
         {
             var user = await _usermanager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Login", "Account");
 
-            // Save file
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(resumeFile.FileName);
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/resumes", fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            if (resume == null || resume.Length == 0)
             {
-                await resumeFile.CopyToAsync(stream);
+                TempData["Message"] = "Invalid file.";
+                return RedirectToAction("Profile");
             }
 
-            // Save resume path
-            user.ResumePath = "/resumes/" + fileName;
+            // Save the resume
+            var uploads = Path.Combine(_webHostEnvironment.WebRootPath, "resumes");
+            if (!Directory.Exists(uploads))
+                Directory.CreateDirectory(uploads);
 
-            
-            user.ResumeKeywords = string.Join(", ", ResumeParser.ExtractKeywordsFromPdf(user.ResumePath));
+            var extension = Path.GetExtension(resume.FileName);
+            var fileName = user.Id + extension;
+            var fullPath = Path.Combine(uploads, fileName);
+            var relativePath = "/resumes/" + fileName;
 
-            System.IO.File.WriteAllText("keywords_debug.txt", user.ResumeKeywords ?? "null");
-            await _usermanager.UpdateAsync(user);
-            // Temporary debug log
-            
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await resume.CopyToAsync(stream);
+            }
 
-            TempData["Success"] = "Resume uploaded and keywords saved successfully.";
+            // Parse Keywords
+            var keywordsList = ResumeParser.ExtractKeywordsFromPdf(relativePath);
+            var keywordString = string.Join(",", keywordsList);
+
+            // Debug Output
+            Console.WriteLine("Parsed Keywords: " + keywordString);
+
+            // Assign to user
+            user.ResumePath = relativePath;
+            user.ResumeKeywords = keywordString;
+
+            // Save using UserManager (NOT _context)
+            var result = await _usermanager.UpdateAsync(user);
+
+            // Debug output
+            Console.WriteLine("UserManager Update Result: " + result.Succeeded);
+
+            if (result.Succeeded)
+                TempData["Message"] = "Resume uploaded and keywords saved.";
+            else
+                TempData["Message"] = "Upload failed: " + string.Join(", ", result.Errors.Select(e => e.Description));
+
             return RedirectToAction("Profile");
         }
+
 
 
 
