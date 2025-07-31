@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace ElasticJobPortal.Controllers
 {
@@ -107,57 +108,56 @@ namespace ElasticJobPortal.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "JobSeeker")]
         public async Task<IActionResult> UploadResume(IFormFile resume)
         {
-            var user = await _usermanager.GetUserAsync(User);
-
-            if (resume == null || resume.Length == 0)
+            if (resume != null && resume.Length > 0)
             {
-                TempData["Message"] = "Invalid file.";
-                return RedirectToAction("Profile");
+                // Save the resume to /wwwroot/resumes
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "resumes");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + resume.FileName;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await resume.CopyToAsync(fileStream);
+                }
+
+                var relativePath = "/resumes/" + uniqueFileName;
+
+                // 🔑 Get current user
+                var user = await _usermanager.GetUserAsync(User);
+
+                if (user != null)
+                {
+                    // ✅ Extract keywords from PDF
+                    var keywords = ResumeParser.ExtractKeywordsFromPdf(relativePath);
+
+                    // ✅ Save to user model
+                    user.ResumePath = relativePath;
+                    user.ResumeKeywords = string.Join(", ", keywords); // comma-separated string
+
+                    // ✅ Update user
+                    var result = await _usermanager.UpdateAsync(user);
+
+                    if (result.Succeeded)
+                    {
+                        TempData["SuccessMessage"] = "Resume uploaded and keywords saved.";
+                        return RedirectToAction("Index"); // ✅ correct action
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Failed to update user info.";
+                    }
+                    Console.WriteLine("Saved Keywords: " + user.ResumeKeywords);
+
+                }
             }
 
-            // Save the resume
-            var uploads = Path.Combine(_webHostEnvironment.WebRootPath, "resumes");
-            if (!Directory.Exists(uploads))
-                Directory.CreateDirectory(uploads);
-
-            var extension = Path.GetExtension(resume.FileName);
-            var fileName = user.Id + extension;
-            var fullPath = Path.Combine(uploads, fileName);
-            var relativePath = "/resumes/" + fileName;
-
-            using (var stream = new FileStream(fullPath, FileMode.Create))
-            {
-                await resume.CopyToAsync(stream);
-            }
-
-            // Parse Keywords
-            var keywordsList = ResumeParser.ExtractKeywordsFromPdf(relativePath);
-            var keywordString = string.Join(",", keywordsList);
-
-            // Debug Output
-            Console.WriteLine("Parsed Keywords: " + keywordString);
-
-            // Assign to user
-            user.ResumePath = relativePath;
-            user.ResumeKeywords = keywordString;
-
-            // Save using UserManager (NOT _context)
-            var result = await _usermanager.UpdateAsync(user);
-
-            // Debug output
-            Console.WriteLine("UserManager Update Result: " + result.Succeeded);
-
-            if (result.Succeeded)
-                TempData["Message"] = "Resume uploaded and keywords saved.";
-            else
-                TempData["Message"] = "Upload failed: " + string.Join(", ", result.Errors.Select(e => e.Description));
-
-            return RedirectToAction("Profile");
+            TempData["ErrorMessage"] = "Invalid file.";
+            return RedirectToAction("Index");
         }
-
 
 
 

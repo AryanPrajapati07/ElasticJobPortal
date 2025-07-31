@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System.Text.RegularExpressions;
-using UglyToad.PdfPig;
+﻿using UglyToad.PdfPig;
+using System.Text;
+using ElasticJobPortal.Helpers;
 
 namespace ElasticJobPortal.Helpers
 {
@@ -20,16 +20,18 @@ namespace ElasticJobPortal.Helpers
             var text = ExtractTextFromPdf(fullPath);
             Console.WriteLine("Extracted Text Length: " + text.Length);
 
-            var keywords = ExtractKeywordsFromPdf(text);
+            var keywords = ExtractKeywordsFromText(text);
             Console.WriteLine("Extracted Keywords Count: " + keywords.Count);
+            
 
             return keywords;
         }
+
         private static string ExtractTextFromPdf(string pdfPath)
         {
             using (var document = PdfDocument.Open(pdfPath))
             {
-                var text = new System.Text.StringBuilder();
+                var text = new StringBuilder();
                 foreach (var page in document.GetPages())
                 {
                     text.AppendLine(page.Text);
@@ -38,5 +40,10 @@ namespace ElasticJobPortal.Helpers
             }
         }
 
+        // ✅ Add this method
+        private static List<string> ExtractKeywordsFromText(string text)
+        {
+            return ResumeKeywordHelper.ExtractSkills(text);
+        }
     }
 }

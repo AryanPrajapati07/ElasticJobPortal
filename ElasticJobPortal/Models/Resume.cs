@@ -12,3 +12,4 @@ namespace ElasticJobPortal.Models
         public string ResumeKeywords { get; internal set; }
     }
 }
+    
