@@ -1,6 +1,4 @@
-﻿
-using ElasticJobPortal.Helpers;
-using ElasticJobPortal.Services;
+﻿using ElasticJobPortal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -129,30 +127,8 @@ namespace ElasticJobPortal.Controllers
                 // 🔑 Get current user
                 var user = await _usermanager.GetUserAsync(User);
 
-                if (user != null)
-                {
-                    // ✅ Extract keywords from PDF
-                    var keywords = ResumeParser.ExtractKeywordsFromPdf(relativePath);
-
-                    // ✅ Save to user model
-                    user.ResumePath = relativePath;
-                    user.ResumeKeywords = string.Join(", ", keywords); // comma-separated string
-
-                    // ✅ Update user
-                    var result = await _usermanager.UpdateAsync(user);
-
-                    if (result.Succeeded)
-                    {
-                        TempData["SuccessMessage"] = "Resume uploaded and keywords saved.";
-                        return RedirectToAction("Index"); // ✅ correct action
-                    }
-                    else
-                    {
-                        TempData["ErrorMessage"] = "Failed to update user info.";
-                    }
-                    Console.WriteLine("Saved Keywords: " + user.ResumeKeywords);
-
-                }
+               
+               
             }
 
             TempData["ErrorMessage"] = "Invalid file.";

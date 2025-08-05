@@ -10,6 +10,6 @@ public class ApplicationUser : IdentityUser
     public string ResumePath { get; set; }
 
     [MaxLength(1000)]
-    public string? ResumeKeywords { get; set; } // Comma-separated keywords for resume search
+    public string? ResumeKeywords { get; set; } 
 
 }

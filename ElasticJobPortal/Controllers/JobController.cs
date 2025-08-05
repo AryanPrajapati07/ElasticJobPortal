@@ -1,4 +1,4 @@
-﻿using ElasticJobPortal.Helpers;
+﻿
 using ElasticJobPortal.Models;
 using ElasticJobPortal.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -271,30 +271,7 @@ namespace ElasticJobPortal.Controllers
 
         }
 
-        [Authorize(Roles = "JobSeeker")]
-        public async Task<IActionResult> RecommendedJobs()
-        {
-            var user = await _usermanager.GetUserAsync(User);
-            ViewBag.ResumeKeywords = user.ResumeKeywords;
-
-            if (string.IsNullOrEmpty(user.ResumePath))
-            {
-                ViewBag.Message = "Please upload a resume to get job recommendations.";
-                return View(new List<Job>());
-            }
-
-            var resumeKeywords = ResumeParser.ExtractKeywordsFromPdf(user.ResumePath); // ✅ returns List<string>
-
-            var allJobs = _context.Jobs.ToList();
-
-            var matchedJobs = allJobs.Where(job =>
-            {
-                var jobTags = job.Tags?.ToLower().Split(',').Select(t => t.Trim()) ?? Enumerable.Empty<string>();
-                return jobTags.Intersect(resumeKeywords).Any();
-            }).ToList();
-
-            return View(matchedJobs);
-        }
+       
 
 
     }
