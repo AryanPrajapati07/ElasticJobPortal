@@ -36,5 +36,25 @@ namespace ElasticJobPortal.Controllers
 
             return View();
         }
+
+        public ActionResult JobDetails(int id)
+        {
+            var job = _context.Jobs.Find(id);
+            var apps = _context.JobApplications.Where(a => a.JobId == id).ToList();
+            var scores = _context.ResumeScores.ToList();
+
+            var model = new JobDetailsViewModel
+            {
+                Job = job,
+                Applications = apps,
+                ResumeScores = scores
+            };
+
+            return View(model);
+        }
+
+
+
+
     }
 }

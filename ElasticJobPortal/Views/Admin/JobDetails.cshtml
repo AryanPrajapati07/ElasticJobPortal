@@ -1,0 +1,49 @@
+﻿@model ElasticJobPortal.Models.JobDetailsViewModel
+
+@{
+    ViewBag.Title = "Job Details & Resume Scoring";
+}
+
+<h2>@Model.Job.Title - Applicants</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Applicant Name</th>
+            <th>Email</th>
+            <th>Score</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var app in Model.Applications)
+        {
+            var score = Model.ResumeScores
+            .FirstOrDefault(s => s.Id == app.Id)?.Score ?? 0;
+
+            <tr>
+                <td>@app.User</td>
+                <td>@app.User</td>
+                <td>@score</td>
+                <td>
+                    <button class="btn btn-primary score-btn" data-appid="@app.Id">
+                        Score
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        $(document).on('click', '.score-btn', function () {
+            var appId = $(this).data('appid');
+
+            $.post('/Admin/ScoreResume', { applicationId: appId }, function (data) {
+                alert("Score updated: " + data.score);
+                location.reload();
+            });
+        });
+    </script>
+}

@@ -21,15 +21,17 @@ namespace ElasticJobPortal.Controllers
         private readonly UserManager<ApplicationUser> _usermanager;
         private readonly IEmailService _emailService;
         private readonly RecommendationService _recommendationService;
+        private readonly FileService _fileService;
 
 
-        public JobController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService,RecommendationService recommendationService)
+        public JobController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IEmailService emailService,RecommendationService recommendationService, FileService fileService)
         {
 
             _context = context;
             _usermanager = userManager;
             _emailService = emailService;
             _recommendationService = recommendationService;
+            _fileService = fileService;
         }
 
         //Job Post
@@ -107,7 +109,7 @@ namespace ElasticJobPortal.Controllers
             }
 
             // Upload resume
-            string resumePath = null;
+            string resumePath = await _fileService.SaveResumeAsync(resumeFile);
             if (resumeFile != null && resumeFile.Length > 0)
             {
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/resumes");
@@ -172,12 +174,23 @@ namespace ElasticJobPortal.Controllers
 
 
         // Search jobs
-        public IActionResult Search(string keyword)
+        public IActionResult Search(string keyword, string company, string jobType, string tag)
         {
-            var jobs = _context.Jobs
-                .Where(j => j.Title.Contains(keyword) || j.Description.Contains(keyword))
-                .ToList();
-            return View(jobs);
+            var jobs = _context.Jobs.AsQueryable();
+
+            if (!string.IsNullOrEmpty(keyword))
+                jobs = jobs.Where(j => j.Title.Contains(keyword) || j.Description.Contains(keyword));
+
+            if (!string.IsNullOrEmpty(company))
+                jobs = jobs.Where(j => j.Company.Contains(company));
+
+            if (!string.IsNullOrEmpty(jobType))
+                jobs = jobs.Where(j => j.JobType == jobType);
+
+            if (!string.IsNullOrEmpty(tag))
+                jobs = jobs.Where(j => j.Tags.Contains(tag));
+
+            return View(jobs.ToList());
         }
 
 

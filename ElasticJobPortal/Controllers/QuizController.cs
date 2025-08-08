@@ -47,6 +47,7 @@ namespace ElasticJobPortal.Controllers
         [HttpPost]
         public async Task<IActionResult> Submit(int categoryId, Dictionary<int, int> answers)
         {
+            
             int correct = 0;
             foreach (var entry in answers)
             {

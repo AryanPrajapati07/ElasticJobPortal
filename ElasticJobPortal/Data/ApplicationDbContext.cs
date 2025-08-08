@@ -18,6 +18,7 @@ namespace ElasticJobPortal.Services
         public DbSet<JobSeekerSubscription> JobSeekerSubscriptions { get; set; }
         public DbSet<PaymentDetail> PaymentDetails { get; set; }
         public DbSet<Resume> Resumes { get; set; }
+        public DbSet<ResumeScore> ResumeScores { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {

@@ -13,7 +13,6 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
 
-
 // ✅ Register DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -23,6 +22,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<RecommendationService>();
+builder.Services.AddScoped<FileService>();
+
 
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
